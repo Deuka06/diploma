@@ -67,7 +67,7 @@ SELECT id, name, category FROM medicines;
 2. Вручную в DB Browser / DBeaver: таблица `medicines`, поле **`active_ingredients`** — JSON-массив, например `["ибупрофен"]`.
 3. Позже — через API (`POST /medicines`), когда добавите маршрут.
 
-## Опционально: PostgreSQL + Docker
+## Опционально: PostgreSQL / Supabase PostgreSQL
 
 Если понадобится PostgreSQL (как на проде):
 
@@ -81,9 +81,41 @@ docker compose up -d
 DATABASE_URL=postgresql+psycopg://medi:medi@localhost:5432/medi
 ```
 
-**Adminer** в браузере: [http://127.0.0.1:8081](http://127.0.0.1:8081) — сервер `db`, пользователь `medi`, пароль `medi`, БД `medi` (только при запущенном `docker compose`).
+### Supabase
+
+Для Supabase используйте строку подключения из Project Settings → Database → Connection String.
+
+Пример:
+
+```env
+DATABASE_URL=postgresql+psycopg://postgres:password@db.etfthwudtdgzipabccxk.supabase.co:5432/postgres?sslmode=require
+```
+
+> Важно: URL `https://etfthwudtdgzipabccxk.supabase.co/rest/v1/` — это Supabase REST endpoint. Он не заменяет `DATABASE_URL` для FastAPI backend. Ваш backend подключается напрямую к базе через PostgreSQL connection string.
 
 Без Docker PostgreSQL можно поставить через [Postgres.app](https://postgresapp.com/) (macOS) или пакетный менеджер и создать БД `medi` вручную.
+
+**Adminer** в браузере: [http://127.0.0.1:8081](http://127.0.0.1:8080) — сервер `db`, пользователь `medi`, пароль `medi`, БД `medi` (только при запущенном `docker compose`).
+
+### Render
+
+Для хостинга backend на Render используйте этот сервис как Python Web Service.
+
+- Build Command: `pip install -r backend/requirements.txt`
+- Start Command: `uvicorn app.main:app --host 0.0.0.0 --port $PORT`
+- Root directory: `backend`
+- Environment: Python
+
+Задайте в Render Environment Variables:
+
+- `DATABASE_URL` — строка из Supabase
+- `JWT_SECRET` — ваш секрет для подписи токенов
+- `JWT_ALGORITHM=HS256`
+- `ACCESS_TOKEN_EXPIRE_MINUTES=10080`
+- `CORS_ORIGINS=*`
+- `OPENAI_API_BASE=https://api.openai.com/v1`
+- `OPENAI_API_KEY` — опционально
+- `OPENAI_MODEL=gpt-4o-mini`
 
 ## Структура
 

@@ -1,20 +1,17 @@
 #!/usr/bin/env python3
 """
-Загрузка демо-лекарств (и опционально тестового пользователя) в PostgreSQL.
+Загрузка демо-лекарств в Supabase PostgreSQL.
 
 Запуск из папки backend (с активированным venv):
-
     cd backend
     source .venv/bin/activate
     PYTHONPATH=. python scripts/seed_medicines.py
-
-Перед этим: docker compose up -d && один раз запустите API (создаст таблицы)
-или скрипт сам вызовет create_all.
 """
 
 from __future__ import annotations
 
 import sys
+from datetime import date
 from pathlib import Path
 
 # корень backend на PYTHONPATH
@@ -30,6 +27,7 @@ from app.models.faq import Faq
 from app.models.medicine import Medicine
 from app.models.seller import Seller
 from app.models.seller_offer import SellerOffer
+from app.models.treatment import Treatment
 from app.models.user import User
 
 
@@ -48,8 +46,9 @@ INDICATION_LABELS: dict[str, str] = {
     "concor": "Для сердечной боли",
 }
 
-# Категории: head | heart | teeth (как в ТЗ)
+# Категории: head | heart | teeth | painkillers | vitamins | antibiotics
 MEDICINES: list[dict] = [
+    # Головная боль (head)
     {
         "id": "paracetamol",
         "name": "Парацетамол",
@@ -62,23 +61,8 @@ MEDICINES: list[dict] = [
         "dosage": "500–1000 мг",
         "instructions": "Принимать по показаниям, не превышать суточную дозу.",
         "restrictions": "С осторожностью при заболеваниях печени.",
-        "image_url": None,
+        "image_url": "assets/med1.png",
         "price": 350.0,
-    },
-    {
-        "id": "analgin",
-        "name": "Анальгин",
-        "category": "teeth",
-        "subcategory": "painkiller",
-        "active_ingredients": ["метамизол натрия"],
-        "allergen_tags": ["pyrazolone", "метамизол"],
-        "analog_ids": ["paracetamol", "naiz"],
-        "description": "Обезболивающее средство группы пиразолонов.",
-        "dosage": "по инструкции",
-        "instructions": "После еды, курс по назначению врача.",
-        "restrictions": "Не сочетать с алкоголем без консультации врача.",
-        "image_url": None,
-        "price": 430.0,
     },
     {
         "id": "nurofen",
@@ -92,7 +76,7 @@ MEDICINES: list[dict] = [
         "dosage": "200–400 мг",
         "instructions": "После еды.",
         "restrictions": "Противопоказания по ЖКТ; не смешивать с алкоголем.",
-        "image_url": None,
+        "image_url": "assets/med3.png",
         "price": 650.0,
     },
     {
@@ -107,7 +91,7 @@ MEDICINES: list[dict] = [
         "dosage": "200 мг",
         "instructions": "После еды, интервал между приёмами не менее 4–6 ч.",
         "restrictions": "См. инструкцию; осторожно при язве ЖКТ.",
-        "image_url": None,
+        "image_url": "assets/med4.png",
         "price": 420.0,
     },
     {
@@ -122,8 +106,24 @@ MEDICINES: list[dict] = [
         "dosage": "по инструкции",
         "instructions": "После еды.",
         "restrictions": "Детям не назначать без врача; осторожность при астме.",
-        "image_url": None,
+        "image_url": "assets/med5.png",
         "price": 280.0,
+    },
+    # Зубная боль (teeth)
+    {
+        "id": "analgin",
+        "name": "Анальгин",
+        "category": "teeth",
+        "subcategory": "painkiller",
+        "active_ingredients": ["метамизол натрия"],
+        "allergen_tags": ["pyrazolone", "метамизол"],
+        "analog_ids": ["paracetamol", "naiz"],
+        "description": "Обезболивающее средство группы пиразолонов.",
+        "dosage": "по инструкции",
+        "instructions": "После еды, курс по назначению врача.",
+        "restrictions": "Не сочетать с алкоголем без консультации врача.",
+        "image_url": "assets/med2.png",
+        "price": 430.0,
     },
     {
         "id": "naiz",
@@ -137,9 +137,25 @@ MEDICINES: list[dict] = [
         "dosage": "100 мг",
         "instructions": "После еды, краткий курс.",
         "restrictions": "Противопоказания по печени; не с алкоголем.",
-        "image_url": None,
+        "image_url": "assets/med6.png",
         "price": 890.0,
     },
+    {
+        "id": "ketanov",
+        "name": "Кетанов",
+        "category": "teeth",
+        "subcategory": "painkiller",
+        "active_ingredients": ["кеторолак"],
+        "allergen_tags": ["nsaid", "keterolac"],
+        "analog_ids": ["analgin", "naiz"],
+        "description": "Сильное НПВП обезболивающее, применяется при зубной боли.",
+        "dosage": "10 мг",
+        "instructions": "После еды, краткосрочный курс, не более 5 дней.",
+        "restrictions": "Противопоказан при кровотечениях, язве желудка.",
+        "image_url": "assets/med9.png",
+        "price": 520.0,
+    },
+    # Сердце (heart)
     {
         "id": "mildronate",
         "name": "Милдронат",
@@ -152,7 +168,7 @@ MEDICINES: list[dict] = [
         "dosage": "по схеме врача",
         "instructions": "Утром или в первой половине дня.",
         "restrictions": "Только по назначению специалиста.",
-        "image_url": None,
+        "image_url": "assets/med7.png",
         "price": 1200.0,
     },
     {
@@ -167,8 +183,176 @@ MEDICINES: list[dict] = [
         "dosage": "2.5–10 мг",
         "instructions": "Строго по назначению кардиолога.",
         "restrictions": "Не отменять резко; контроль ЧСС и АД.",
-        "image_url": None,
+        "image_url": "assets/med8.png",
         "price": 2100.0,
+    },
+    {
+        "id": "ronocit",
+        "name": "Роноцит",
+        "category": "heart",
+        "subcategory": "cardio_metabolic",
+        "active_ingredients": ["цитиколин"],
+        "allergen_tags": [],
+        "analog_ids": ["mildronate"],
+        "description": "Ноотропный препарат для улучшения кровообращения мозга.",
+        "dosage": "500–2000 мг/сут",
+        "instructions": "Утром, по назначению врача.",
+        "restrictions": "Только по назначению.",
+        "image_url": "assets/med10.png",
+        "price": 1850.0,
+    },
+    # Обезболивающие (painkillers)
+    {
+        "id": "pentalgin",
+        "name": "Пенталгин",
+        "category": "painkillers",
+        "subcategory": "painkiller",
+        "active_ingredients": ["парацетамол", "напроксен", "кофеин", "дротаверин"],
+        "allergen_tags": ["nsaid", "analgesic"],
+        "analog_ids": ["paracetamol", "ibuprofen"],
+        "description": "Комбинированный анальгетик для снятия боли разного характера.",
+        "dosage": "1 таблетка",
+        "instructions": "После еды, не более 3 таблеток в сутки.",
+        "restrictions": "Не применять при ЖКТ-проблемах.",
+        "image_url": "assets/med1.png",
+        "price": 480.0,
+    },
+    {
+        "id": "no-shpa",
+        "name": "Но-шпа",
+        "category": "painkillers",
+        "subcategory": "antispasmodic",
+        "active_ingredients": ["дротаверин"],
+        "allergen_tags": [],
+        "analog_ids": ["pentalgin"],
+        "description": "Спазмолитик для снятия спазмов гладкой мускулатуры.",
+        "dosage": "40–80 мг",
+        "instructions": "При болях, не более 240 мг/сут.",
+        "restrictions": "С осторожностью при гипотонии.",
+        "image_url": "assets/med2.png",
+        "price": 320.0,
+    },
+    {
+        "id": "nimesil",
+        "name": "Нимесил",
+        "category": "painkillers",
+        "subcategory": "painkiller",
+        "active_ingredients": ["нимесулид"],
+        "allergen_tags": ["nsaid"],
+        "analog_ids": ["naiz", "ketanov"],
+        "description": "Противовоспалительное и обезболивающее средство.",
+        "dosage": "100 мг (1 пакетик)",
+        "instructions": "Растворить в воде, после еды.",
+        "restrictions": "Не более 2 пакетиков в сутки, не для длительного применения.",
+        "image_url": "assets/med3.png",
+        "price": 720.0,
+    },
+    # Витамины (vitamins)
+    {
+        "id": "vitamin-c",
+        "name": "Витамин C",
+        "category": "vitamins",
+        "subcategory": "vitamin",
+        "active_ingredients": ["аскорбиновая кислота"],
+        "allergen_tags": [],
+        "analog_ids": ["vitamin-d3", "multivitamin"],
+        "description": "Укрепляет иммунитет и антиоксидантную защиту организма.",
+        "dosage": "500–1000 мг",
+        "instructions": "После еды.",
+        "restrictions": "С осторожностью при гастрите.",
+        "image_url": "assets/med4.png",
+        "price": 250.0,
+    },
+    {
+        "id": "vitamin-d3",
+        "name": "Витамин D3",
+        "category": "vitamins",
+        "subcategory": "vitamin",
+        "active_ingredients": ["холекальциферол"],
+        "allergen_tags": [],
+        "analog_ids": ["vitamin-c", "multivitamin"],
+        "description": "Поддерживает здоровье костей и иммунной системы.",
+        "dosage": "1000–2000 МЕ",
+        "instructions": "Во время еды с жирной пищей.",
+        "restrictions": "Не превышать дозу без контроля анализов.",
+        "image_url": "assets/med5.png",
+        "price": 450.0,
+    },
+    {
+        "id": "multivitamin",
+        "name": "Мультивитамины",
+        "category": "vitamins",
+        "subcategory": "vitamin",
+        "active_ingredients": ["комплекс витаминов"],
+        "allergen_tags": [],
+        "analog_ids": ["vitamin-c", "vitamin-d3"],
+        "description": "Комплекс витаминов и минералов для поддержания здоровья.",
+        "dosage": "1 таблетка",
+        "instructions": "После еды, ежедневно.",
+        "restrictions": "Не сочетать с другими витаминными комплексами.",
+        "image_url": "assets/med6.png",
+        "price": 680.0,
+    },
+    {
+        "id": "omega-3",
+        "name": "Омега-3",
+        "category": "vitamins",
+        "subcategory": "supplement",
+        "active_ingredients": ["рыбий жир", "ЭПК", "ДГК"],
+        "allergen_tags": ["fish"],
+        "analog_ids": ["multivitamin"],
+        "description": "Полезные жирные кислоты для сердца и мозга.",
+        "dosage": "1–2 капсулы",
+        "instructions": "После еды.",
+        "restrictions": "С осторожностью при аллергии на рыбу.",
+        "image_url": "assets/med7.png",
+        "price": 890.0,
+    },
+    # Антибиотики (antibiotics)
+    {
+        "id": "amoxicillin",
+        "name": "Амоксициллин",
+        "category": "antibiotics",
+        "subcategory": "penicillin",
+        "active_ingredients": ["амоксициллин"],
+        "allergen_tags": ["penicillin", "antibiotic"],
+        "analog_ids": ["azithromycin", "ciprofloxacin"],
+        "description": "Антибиотик пенициллинового ряда широкого спектра.",
+        "dosage": "500 мг",
+        "instructions": "3 раза в день, независимо от еды, курс 5–7 дней.",
+        "restrictions": "Противопоказан при аллергии на пенициллин.",
+        "image_url": "assets/med8.png",
+        "price": 280.0,
+    },
+    {
+        "id": "azithromycin",
+        "name": "Азитромицин",
+        "category": "antibiotics",
+        "subcategory": "macrolide",
+        "active_ingredients": ["азитромицин"],
+        "allergen_tags": ["macrolide", "antibiotic"],
+        "analog_ids": ["amoxicillin", "ciprofloxacin"],
+        "description": "Макролидный антибиотик с длительным действием.",
+        "dosage": "500 мг",
+        "instructions": "1 раз в день, 3 дня.",
+        "restrictions": "С осторожностью при заболеваниях печени.",
+        "image_url": "assets/med9.png",
+        "price": 420.0,
+    },
+    {
+        "id": "ciprofloxacin",
+        "name": "Ципрофлоксацин",
+        "category": "antibiotics",
+        "subcategory": "fluoroquinolone",
+        "active_ingredients": ["ципрофлоксацин"],
+        "allergen_tags": ["fluoroquinolone", "antibiotic"],
+        "analog_ids": ["amoxicillin", "azithromycin"],
+        "description": "Фторхинолоновый антибиотик для лечения инфекций.",
+        "dosage": "500 мг",
+        "instructions": "2 раза в день, запивая большим количеством воды.",
+        "restrictions": "Противопоказан детям и беременным.",
+        "image_url": "assets/med10.png",
+        "price": 350.0,
     },
 ]
 
@@ -294,12 +478,16 @@ def ensure_demo_user(db: Session) -> None:
 
     def _apply_demo_fields(u: User) -> None:
         u.hashed_password = pw
-        u.full_name = "Демо Пользователь"
-        u.first_name = "Демо"
-        u.last_name = "Пользователь"
+        u.full_name = "Медет Махамбетхан"
+        u.first_name = "Медет"
+        u.last_name = "Махамбетхан"
+        u.gender = "male"
+        u.age = 21
+        u.weight_kg = 72.0
+        u.height_cm = 178.0
         u.onboarding_completed = True
-        u.allergy_types = ["medicinal"]
-        u.allergen_substances = ["ибупрофен", "аспирин", "диклофенак", "метамизол"]
+        u.allergy_types = ["food", "drug"]
+        u.allergen_substances = ["ибупрофен", "аспирин", "пенициллин"]
 
     # Важно: сначала ищем целевой email в БД. Нельзя сначала переименовывать legacy без flush —
     # иначе повторный SELECT не увидит строку и попытка INSERT даст UNIQUE.
@@ -323,15 +511,76 @@ def ensure_demo_user(db: Session) -> None:
         User(
             email=email,
             hashed_password=pw,
-            full_name="Демо Пользователь",
-            first_name="Демо",
-            last_name="Пользователь",
+            full_name="Медет Махамбетхан",
+            first_name="Медет",
+            last_name="Махамбетхан",
+            gender="male",
+            age=21,
+            weight_kg=72.0,
+            height_cm=178.0,
             onboarding_completed=True,
-            allergy_types=["medicinal"],
-            allergen_substances=["ибупрофен", "аспирин", "диклофенак", "метамизол"],
+            allergy_types=["food", "drug"],
+            allergen_substances=["ибупрофен", "аспирин", "пенициллин"],
         )
     )
     print(f"Создан пользователь: {email} / пароль: demo123 (только для локального MVP)")
+
+
+DEMO_TREATMENTS: list[dict] = [
+    # Активные (показываются на главной)
+    {
+        "disease_name": "Грипп",
+        "medicine_name": "Парацетамол",
+        "start_date": date(2026, 5, 4),
+        "end_date": date(2026, 5, 24),
+        "intake_time": "19:00 – 20:00",
+        "color_index": 0,
+    },
+    {
+        "disease_name": "Витаминный курс",
+        "medicine_name": "Витамин С",
+        "start_date": date(2026, 5, 10),
+        "end_date": date(2026, 6, 1),
+        "intake_time": "19:00 – 20:00",
+        "color_index": 1,
+    },
+    {
+        "disease_name": "Профилактика",
+        "medicine_name": "Аспирин",
+        "start_date": date(2026, 5, 14),
+        "end_date": date(2026, 5, 28),
+        "intake_time": "08:00 – 08:30",
+        "color_index": 2,
+    },
+    # Завершённые (показываются в обзоре)
+    {
+        "disease_name": "Насморк",
+        "medicine_name": "Нурофен",
+        "start_date": date(2026, 4, 11),
+        "end_date": date(2026, 4, 18),
+        "intake_time": "08:00 – 09:00",
+        "color_index": 1,
+    },
+    {
+        "disease_name": "Головная боль",
+        "medicine_name": "Аспирин",
+        "start_date": date(2026, 3, 15),
+        "end_date": date(2026, 3, 23),
+        "intake_time": "12:00 – 13:00",
+        "color_index": 2,
+    },
+]
+
+
+def seed_treatments(db: Session) -> None:
+    user = db.query(User).filter(User.email == "demo@example.com").one_or_none()
+    if user is None:
+        return
+    if db.query(Treatment).filter(Treatment.user_id == user.id).count() > 0:
+        return
+    for t in DEMO_TREATMENTS:
+        db.add(Treatment(user_id=user.id, **t))
+    print(f"Создано {len(DEMO_TREATMENTS)} демо-лечений для {user.email}")
 
 
 def main() -> None:
@@ -343,7 +592,9 @@ def main() -> None:
         seed_faqs(db)
         ensure_demo_user(db)
         db.commit()
-        print(f"Готово: лекарства {len(MEDICINES)} шт., продавцы, офферы, FAQ, демо-пользователь.")
+        seed_treatments(db)
+        db.commit()
+        print(f"Готово: лекарства {len(MEDICINES)} шт., продавцы, офферы, FAQ, демо-пользователь, лечения.")
     except Exception:
         db.rollback()
         raise

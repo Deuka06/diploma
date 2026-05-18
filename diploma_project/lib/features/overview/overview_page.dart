@@ -1,11 +1,13 @@
 import 'dart:math' as math;
 import 'dart:ui';
 
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:provider/provider.dart';
 
+import '../../core/auth/auth_controller.dart';
 import '../../core/theme/medi_theme.dart';
 
-/// Обзор прогресса лечения по макету: шапка, карточки с градиентом, FAB «+», sheet «Добавить».
 class OverviewPage extends StatefulWidget {
   const OverviewPage({super.key});
 
@@ -14,18 +16,106 @@ class OverviewPage extends StatefulWidget {
 }
 
 class _OverviewPageState extends State<OverviewPage> {
+  List<Map<String, dynamic>> _treatments = [];
+  bool _loading = true;
+
+  static const _gradients = [
+    [Color(0xFF8B6CFF), Color(0xFF5B3FD4)],
+    [Color(0xFFFF8A7A), Color(0xFFFF5E6B)],
+    [Color(0xFF6BC4FF), Color(0xFF3A9FE8)],
+    [Color(0xFF6BFF9F), Color(0xFF3AB85A)],
+    [Color(0xFFFFBE6B), Color(0xFFFF8E3A)],
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _load();
+  }
+
+  Future<void> _load() async {
+    final auth = context.read<AuthController>();
+    setState(() => _loading = true);
+    try {
+      final res = await auth.client.dio.get<List<dynamic>>('/treatments');
+      setState(() {
+        _treatments = (res.data ?? []).cast<Map<String, dynamic>>();
+        _loading = false;
+      });
+    } on DioException {
+      setState(() => _loading = false);
+    }
+  }
+
+  LinearGradient _gradient(int colorIndex) {
+    final colors = _gradients[colorIndex.clamp(0, _gradients.length - 1)];
+    return LinearGradient(
+      begin: Alignment.topLeft,
+      end: Alignment.bottomRight,
+      colors: colors,
+    );
+  }
+
+  String _formatDate(String? dateStr) {
+    if (dateStr == null) return '—';
+    try {
+      final d = DateTime.parse(dateStr);
+      return '${d.day.toString().padLeft(2, '0')}.${d.month.toString().padLeft(2, '0')}';
+    } catch (_) {
+      return dateStr;
+    }
+  }
+
   void _openAddSheet() {
     showModalBottomSheet<void>(
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
       barrierColor: Colors.transparent,
-      builder: (ctx) => _AddTreatmentSheet(onClose: () => Navigator.of(ctx).pop()),
+      builder: (ctx) => _AddTreatmentSheet(
+        onSubmit: (diseaseName, medicineName, durationDays) async {
+          Navigator.of(ctx).pop();
+          await _createTreatment(diseaseName, medicineName, durationDays);
+        },
+      ),
     );
+  }
+
+  Future<void> _createTreatment(
+      String diseaseName, String? medicineName, int durationDays) async {
+    final auth = context.read<AuthController>();
+    final now = DateTime.now();
+    final end = now.add(Duration(days: durationDays > 0 ? durationDays : 7));
+    try {
+      await auth.client.dio.post<void>(
+        '/treatments',
+        data: {
+          'disease_name': diseaseName,
+          if (medicineName != null && medicineName.isNotEmpty)
+            'medicine_name': medicineName,
+          'start_date': now.toIso8601String().split('T').first,
+          'end_date': end.toIso8601String().split('T').first,
+          'color_index': _treatments.length % _gradients.length,
+        },
+      );
+      await _load();
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          const SnackBar(content: Text('Лечение добавлено')),
+        );
+      }
+    } on DioException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? 'Ошибка')),
+        );
+      }
+    }
   }
 
   @override
   Widget build(BuildContext context) {
+    final userName = context.watch<AuthController>().userName ?? 'Медет';
     return Scaffold(
       backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton(
@@ -37,119 +127,117 @@ class _OverviewPageState extends State<OverviewPage> {
       ),
       floatingActionButtonLocation: FloatingActionButtonLocation.centerFloat,
       body: SafeArea(
-        child: ListView(
-          padding: const EdgeInsets.fromLTRB(0, 0, 0, 100),
-          children: [
-            Padding(
-              padding: const EdgeInsets.fromLTRB(20, 8, 12, 8),
-              child: Row(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Expanded(
-                    child: Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Привет, Медет!',
-                          style: TextStyle(
-                            fontSize: 19,
-                            fontWeight: FontWeight.w600,
-                            height: 1.2,
-                            color: MediColors.greetingPurple,
+        child: RefreshIndicator(
+          color: MediColors.accentPurple,
+          onRefresh: _load,
+          child: ListView(
+            padding: const EdgeInsets.fromLTRB(0, 0, 0, 100),
+            children: [
+              Padding(
+                padding: const EdgeInsets.fromLTRB(20, 8, 12, 8),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Expanded(
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            'Привет, $userName!',
+                            style: TextStyle(
+                              fontSize: 19,
+                              fontWeight: FontWeight.w600,
+                              height: 1.2,
+                              color: MediColors.greetingPurple,
+                            ),
                           ),
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Ваш прогресс за последний месяц',
-                          style: const TextStyle(
-                            fontSize: 25,
-                            fontWeight: FontWeight.w800,
-                            height: 1.2,
-                            color: Color(0xFF2D2D2D),
+                          const SizedBox(height: 8),
+                          const Text(
+                            'Ваш прогресс за последний месяц',
+                            style: TextStyle(
+                              fontSize: 25,
+                              fontWeight: FontWeight.w800,
+                              height: 1.2,
+                              color: Color(0xFF2D2D2D),
+                            ),
                           ),
+                        ],
+                      ),
+                    ),
+                    IconButton(
+                      onPressed: () {},
+                      icon: Icon(Icons.notifications_rounded,
+                          color: MediColors.accentPurple, size: 26),
+                      padding: EdgeInsets.zero,
+                      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                    ),
+                    const SizedBox(width: 2),
+                    const Padding(
+                      padding: EdgeInsets.only(top: 6),
+                      child: CircleAvatar(
+                        radius: 20,
+                        backgroundColor: Color(0xFFFFC107),
+                        child: Text('🐕', style: TextStyle(fontSize: 20)),
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+              const SizedBox(height: 12),
+              if (_loading)
+                const Padding(
+                  padding: EdgeInsets.only(top: 60),
+                  child: Center(
+                      child: CircularProgressIndicator(
+                          color: MediColors.accentPurple)),
+                )
+              else if (_treatments.isEmpty)
+                const Padding(
+                  padding: EdgeInsets.fromLTRB(20, 60, 20, 0),
+                  child: Center(
+                    child: Text(
+                      'Нет записей о лечении.\nНажмите + чтобы добавить.',
+                      textAlign: TextAlign.center,
+                      style: TextStyle(color: MediColors.textMuted, fontSize: 15),
+                    ),
+                  ),
+                )
+              else
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20),
+                  child: Column(
+                    children: _treatments.map((t) {
+                      final colorIdx = (t['color_index'] as int?) ?? 0;
+                      final progress =
+                          (t['progress'] as num?)?.toDouble() ?? 0.0;
+                      final startDate = _formatDate(t['start_date'] as String?);
+                      final endDate = _formatDate(t['end_date'] as String?);
+                      final isCompleted = t['is_completed'] == true;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 14),
+                        child: _OverviewProgressCard(
+                          title: t['disease_name'] as String? ?? '',
+                          subtext: isCompleted
+                              ? 'Вы успешно завершили'
+                              : 'Ваш еженедельный отчет',
+                          dates: 'Начало $startDate - Конец $endDate',
+                          progress: progress,
+                          ringStroke: isCompleted ? 8 : 5,
+                          trackAlpha: isCompleted ? 0.45 : 0.28,
+                          gradient: _gradient(colorIdx),
                         ),
-                      ],
-                    ),
+                      );
+                    }).toList(),
                   ),
-                  IconButton(
-                    onPressed: () {},
-                    icon: Icon(
-                      Icons.notifications_rounded,
-                      color: MediColors.accentPurple,
-                      size: 26,
-                    ),
-                    padding: EdgeInsets.zero,
-                    constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-                  ),
-                  const SizedBox(width: 2),
-                  const Padding(
-                    padding: EdgeInsets.only(top: 6),
-                    child: CircleAvatar(
-                      radius: 20,
-                      backgroundColor: Color(0xFFFFC107),
-                      child: Text('🐕', style: TextStyle(fontSize: 20)),
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            const SizedBox(height: 12),
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20),
-              child: Column(
-                children: [
-                  _OverviewProgressCard(
-                    title: 'Лечения Грипп',
-                    subtext: 'Ваш еженедельный отчет',
-                    dates: 'Начало 22.03 - Конец 29.03',
-                    progress: 0.65,
-                    ringStroke: 5,
-                    trackAlpha: 0.28,
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF8B6CFF), Color(0xFF5B3FD4)],
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  _OverviewProgressCard(
-                    title: 'Лечения Насморк',
-                    subtext: 'Вы успешно завершили',
-                    dates: 'Начало 11.02 - Конец 18.02',
-                    progress: 1.0,
-                    ringStroke: 8,
-                    trackAlpha: 0.45,
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFFFF8A7A), Color(0xFFFF5E6B)],
-                    ),
-                  ),
-                  const SizedBox(height: 14),
-                  _OverviewProgressCard(
-                    title: 'Лечения Головная боль',
-                    subtext: 'Вы успешно завершили',
-                    dates: 'Начало 15.01 - Конец 23.01',
-                    progress: 1.0,
-                    ringStroke: 8,
-                    trackAlpha: 0.45,
-                    gradient: const LinearGradient(
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                      colors: [Color(0xFF6BC4FF), Color(0xFF3A9FE8)],
-                    ),
-                  ),
-                ],
-              ),
-            ),
-          ],
+                ),
+            ],
+          ),
         ),
       ),
     );
   }
 }
 
-/// Волны на фоне карточки (макет).
 class _CardWavePainter extends CustomPainter {
   _CardWavePainter({required this.waveColor});
 
@@ -230,10 +318,9 @@ class _OverviewProgressCard extends StatelessWidget {
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
-            blurRadius: 16,
-            offset: const Offset(0, 8),
-          ),
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 16,
+              offset: const Offset(0, 8)),
         ],
       ),
       clipBehavior: Clip.antiAlias,
@@ -244,8 +331,7 @@ class _OverviewProgressCard extends StatelessWidget {
               decoration: BoxDecoration(gradient: gradient),
               child: CustomPaint(
                 painter: _CardWavePainter(
-                  waveColor: Colors.white.withValues(alpha: 0.14),
-                ),
+                    waveColor: Colors.white.withValues(alpha: 0.14)),
               ),
             ),
           ),
@@ -301,7 +387,8 @@ class _OverviewProgressCard extends StatelessWidget {
                         child: CircularProgressIndicator(
                           value: progress,
                           strokeWidth: ringStroke,
-                          backgroundColor: Colors.white.withValues(alpha: trackAlpha),
+                          backgroundColor:
+                              Colors.white.withValues(alpha: trackAlpha),
                           color: Colors.white,
                           strokeCap: StrokeCap.round,
                         ),
@@ -327,9 +414,10 @@ class _OverviewProgressCard extends StatelessWidget {
 }
 
 class _AddTreatmentSheet extends StatefulWidget {
-  const _AddTreatmentSheet({required this.onClose});
+  const _AddTreatmentSheet({required this.onSubmit});
 
-  final VoidCallback onClose;
+  final void Function(String diseaseName, String? medicineName, int durationDays)
+      onSubmit;
 
   @override
   State<_AddTreatmentSheet> createState() => _AddTreatmentSheetState();
@@ -337,16 +425,16 @@ class _AddTreatmentSheet extends StatefulWidget {
 
 class _AddTreatmentSheetState extends State<_AddTreatmentSheet> {
   final _disease = TextEditingController();
-  final _period = TextEditingController();
   final _medicine = TextEditingController();
+  final _period = TextEditingController();
 
   static const _fieldFill = Color(0xFFE8EAF6);
 
   @override
   void dispose() {
     _disease.dispose();
-    _period.dispose();
     _medicine.dispose();
+    _period.dispose();
     super.dispose();
   }
 
@@ -362,14 +450,12 @@ class _AddTreatmentSheetState extends State<_AddTreatmentSheet> {
         children: [
           Positioned.fill(
             child: GestureDetector(
-              onTap: widget.onClose,
+              onTap: () => Navigator.of(context).pop(),
               behavior: HitTestBehavior.opaque,
               child: ClipRect(
                 child: BackdropFilter(
                   filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-                  child: Container(
-                    color: Colors.black.withValues(alpha: 0.32),
-                  ),
+                  child: Container(color: Colors.black.withValues(alpha: 0.32)),
                 ),
               ),
             ),
@@ -405,46 +491,51 @@ class _AddTreatmentSheetState extends State<_AddTreatmentSheet> {
                         const Text(
                           'Добавить',
                           style: TextStyle(
-                            fontSize: 24,
-                            fontWeight: FontWeight.w800,
-                            color: Color(0xFF000000),
-                          ),
+                              fontSize: 24,
+                              fontWeight: FontWeight.w800,
+                              color: Color(0xFF000000)),
                         ),
                         const SizedBox(height: 20),
                         _SheetField(
-                          controller: _disease,
-                          hint: 'Название болезни',
-                          fillColor: _fieldFill,
-                        ),
+                            controller: _disease,
+                            hint: 'Название болезни',
+                            fillColor: _fieldFill),
                         const SizedBox(height: 12),
                         _SheetField(
-                          controller: _period,
-                          hint: 'На какой срок',
-                          fillColor: _fieldFill,
-                        ),
+                            controller: _period,
+                            hint: 'На какой срок (дней)',
+                            fillColor: _fieldFill,
+                            keyboardType: TextInputType.number),
                         const SizedBox(height: 12),
                         _SheetField(
-                          controller: _medicine,
-                          hint: 'Лекарство',
-                          fillColor: _fieldFill,
-                        ),
+                            controller: _medicine,
+                            hint: 'Лекарство (необязательно)',
+                            fillColor: _fieldFill),
                         const SizedBox(height: 24),
                         SizedBox(
                           height: 54,
                           child: FilledButton(
                             onPressed: () {
-                              final messenger = ScaffoldMessenger.of(context);
-                              widget.onClose();
-                              messenger.showSnackBar(
-                                const SnackBar(content: Text('Лечение добавлено (MVP)')),
+                              final disease = _disease.text.trim();
+                              if (disease.isEmpty) return;
+                              final days =
+                                  int.tryParse(_period.text.trim()) ?? 7;
+                              widget.onSubmit(
+                                disease,
+                                _medicine.text.trim().isNotEmpty
+                                    ? _medicine.text.trim()
+                                    : null,
+                                days,
                               );
                             },
                             style: FilledButton.styleFrom(
                               backgroundColor: MediColors.accentPurple,
                               foregroundColor: Colors.white,
                               elevation: 0,
-                              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                              textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
+                              shape: RoundedRectangleBorder(
+                                  borderRadius: BorderRadius.circular(16)),
+                              textStyle: const TextStyle(
+                                  fontSize: 17, fontWeight: FontWeight.w800),
                             ),
                             child: const Text('Добавить'),
                           ),
@@ -467,16 +558,19 @@ class _SheetField extends StatelessWidget {
     required this.controller,
     required this.hint,
     required this.fillColor,
+    this.keyboardType,
   });
 
   final TextEditingController controller;
   final String hint;
   final Color fillColor;
+  final TextInputType? keyboardType;
 
   @override
   Widget build(BuildContext context) {
     return TextField(
       controller: controller,
+      keyboardType: keyboardType,
       decoration: InputDecoration(
         hintText: hint,
         hintStyle: TextStyle(
@@ -490,7 +584,8 @@ class _SheetField extends StatelessWidget {
           borderRadius: BorderRadius.circular(14),
           borderSide: BorderSide.none,
         ),
-        contentPadding: const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
+        contentPadding:
+            const EdgeInsets.symmetric(horizontal: 18, vertical: 16),
       ),
     );
   }

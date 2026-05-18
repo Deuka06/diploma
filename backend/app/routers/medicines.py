@@ -4,8 +4,9 @@ from sqlalchemy.orm import Session
 from app.database import get_db
 from app.deps_auth import get_current_user, get_current_user_optional
 from app.models.medicine import Medicine
+from app.models.seller_offer import SellerOffer
 from app.models.user import User
-from app.schemas.medicine import CategoryOut, MedicineBrief, MedicineDetail, MedicineSafetyOut
+from app.schemas.medicine import CategoryOut, MedicineBrief, MedicineDetail, MedicineSafetyOut, SellerOfferOut
 from app.services.allergy import build_safety_payload
 
 router = APIRouter(prefix="/medicines", tags=["medicines"])
@@ -14,6 +15,9 @@ CATEGORIES: list[CategoryOut] = [
     CategoryOut(id="heart", label="Сердце"),
     CategoryOut(id="teeth", label="Зубы"),
     CategoryOut(id="head", label="Голова"),
+    CategoryOut(id="painkillers", label="Обезболивающие"),
+    CategoryOut(id="vitamins", label="Витамины"),
+    CategoryOut(id="antibiotics", label="Антибиотики"),
 ]
 
 
@@ -63,6 +67,19 @@ def medicine_safety(
         warning_message=payload["warning_message"],
         alternatives=alts,
     )
+
+
+@router.get("/{medicine_id}/offers", response_model=list[SellerOfferOut])
+def list_offers(
+    medicine_id: str,
+    tag: str | None = Query(default=None),
+    db: Session = Depends(get_db),
+) -> list[SellerOffer]:
+    query = db.query(SellerOffer).filter(SellerOffer.medicine_id == medicine_id)
+    offers = query.all()
+    if tag:
+        offers = [o for o in offers if o.tags and tag in o.tags]
+    return offers
 
 
 @router.get("/{medicine_id}/safety/public", response_model=MedicineSafetyOut)

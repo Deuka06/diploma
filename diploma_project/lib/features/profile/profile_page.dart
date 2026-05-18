@@ -101,17 +101,20 @@ class _ProfilePageState extends State<ProfilePage> {
                             _ProfileMenuRow(
                               icon: Icons.edit_outlined,
                               label: 'Изменить профиль',
-                              onTap: () {},
+                              onTap: () async {
+                                await context.push('/edit-profile');
+                                if (context.mounted) _load();
+                              },
                             ),
                             _ProfileMenuRow(
                               icon: Icons.credit_card_outlined,
                               label: 'Карта',
-                              onTap: () {},
+                              onTap: () => context.push('/card'),
                             ),
                             _ProfileMenuRow(
                               icon: Icons.edit_note_outlined,
                               label: 'Пройти проверку',
-                              onTap: () {},
+                              onTap: () => context.push('/onboarding'),
                             ),
                             _ProfileMenuRow(
                               icon: Icons.help_outline_rounded,
@@ -250,8 +253,11 @@ class _ProfileHeaderBlock extends StatelessWidget {
                             width: avatarR * 2,
                             height: avatarR * 2,
                             fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => const Center(
-                              child: Text('🐕', style: TextStyle(fontSize: 44)),
+                            errorBuilder: (_, __, ___) => Image.asset(
+                              'assets/6.png',
+                              width: avatarR * 2,
+                              height: avatarR * 2,
+                              fit: BoxFit.cover,
                             ),
                           ),
                         ),

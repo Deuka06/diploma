@@ -12,7 +12,8 @@ class WelcomePage extends StatelessWidget {
       body: SafeArea(
         child: Padding(
           padding: const EdgeInsets.all(24),
-          child: Column(
+          child: SingleChildScrollView(
+            child: Column(
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               const SizedBox(height: 24),
@@ -30,24 +31,18 @@ class WelcomePage extends StatelessWidget {
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: MediColors.textMuted),
               ),
-              const SizedBox(height: 40),
-              Icon(Icons.waving_hand, size: 120, color: MediColors.primary.withOpacity(0.35)),
-              const Spacer(),
+              const SizedBox(height: 32),
+              Image.asset(
+                'assets/1.png',
+                height: 200,
+                fit: BoxFit.contain,
+              ),
+              const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () => context.push('/register'),
                 child: const Text('Продолжить с почтой'),
               ),
-              const SizedBox(height: 12),
-              OutlinedButton(
-                onPressed: () {},
-                child: const Text('Продолжить с помощью Google'),
-              ),
-              const SizedBox(height: 8),
-              OutlinedButton(
-                onPressed: () {},
-                child: const Text('Продолжить с помощью Apple'),
-              ),
-              const SizedBox(height: 24),
+              const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
@@ -59,6 +54,7 @@ class WelcomePage extends StatelessWidget {
                 ],
               ),
             ],
+          ),
           ),
         ),
       ),

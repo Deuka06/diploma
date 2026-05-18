@@ -18,8 +18,11 @@ import '../features/checkout/checkout_selection.dart';
 import '../features/medicine/medicine_detail_page.dart';
 import '../features/medicine/medicine_tab_page.dart';
 import '../features/overview/overview_page.dart';
+import '../features/profile/card_page.dart';
+import '../features/profile/edit_profile_page.dart';
 import '../features/profile/help_page.dart';
 import '../features/profile/profile_page.dart';
+import '../features/reminders/reminders_page.dart';
 import '../features/shell/medi_shell.dart';
 
 final GlobalKey<NavigatorState> rootNavigatorKey = GlobalKey<NavigatorState>();
@@ -121,6 +124,21 @@ GoRouter createAppRouter(AuthController auth) {
         parentNavigatorKey: rootNavigatorKey,
         path: '/help',
         builder: (_, __) => const HelpPage(),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '/edit-profile',
+        builder: (_, __) => const EditProfilePage(),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '/card',
+        builder: (_, __) => const CardPage(),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '/reminders',
+        builder: (_, __) => const RemindersPage(),
       ),
     ],
   );

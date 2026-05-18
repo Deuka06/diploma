@@ -337,11 +337,7 @@ class _ProductImageCard extends StatelessWidget {
         child: AspectRatio(
           aspectRatio: 1.15,
           child: imageUrl != null && imageUrl!.isNotEmpty
-              ? Image.network(
-                  imageUrl!,
-                  fit: BoxFit.contain,
-                  errorBuilder: (_, __, ___) => _placeholder(),
-                )
+              ? _mediImage(imageUrl!, BoxFit.contain, _placeholder())
               : _placeholder(),
         ),
       ),
@@ -355,6 +351,13 @@ class _ProductImageCard extends StatelessWidget {
       color: MediColors.accentPurple.withValues(alpha: 0.35),
     );
   }
+}
+
+Widget _mediImage(String url, BoxFit fit, Widget placeholder) {
+  if (url.startsWith('assets/')) {
+    return Image.asset(url, fit: fit, errorBuilder: (_, __, ___) => placeholder);
+  }
+  return Image.network(url, fit: fit, errorBuilder: (_, __, ___) => placeholder);
 }
 
 class _DetailRow extends StatelessWidget {

@@ -82,36 +82,29 @@ class _MedicineTabPageState extends State<MedicineTabPage> {
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Row(
-                        mainAxisAlignment: MainAxisAlignment.end,
-                        children: [
-                          IconButton(
-                            onPressed: () {},
-                            icon: Icon(
-                              Icons.notifications_none_rounded,
-                              color: MediColors.greetingPurple,
-                              size: 28,
-                            ),
-                            padding: EdgeInsets.zero,
-                            constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
+                      Align(
+                        alignment: Alignment.centerRight,
+                        child: CircleAvatar(
+                          radius: 22,
+                          backgroundColor: MediColors.accentPurple.withValues(alpha: 0.15),
+                          child: Icon(
+                            Icons.person_rounded,
+                            size: 26,
+                            color: MediColors.accentPurple,
                           ),
-                          const SizedBox(width: 4),
-                          const CircleAvatar(
-                            radius: 22,
-                            backgroundColor: Color(0xFFFFC107),
-                            child: Text('🐕', style: TextStyle(fontSize: 22)),
-                          ),
-                        ],
+                        ),
                       ),
                       const SizedBox(height: 12),
-                      Text(
-                        'Привет, Медет!',
-                        style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                              color: MediColors.greetingPurple,
-                              fontWeight: FontWeight.w800,
-                              fontSize: 26,
-                              height: 1.15,
-                            ),
+                      Consumer<AuthController>(
+                        builder: (_, auth, __) => Text(
+                          'Привет, ${auth.userName ?? 'Медет'}!',
+                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
+                                color: MediColors.greetingPurple,
+                                fontWeight: FontWeight.w800,
+                                fontSize: 26,
+                                height: 1.15,
+                              ),
+                        ),
                       ),
                       const SizedBox(height: 10),
                       const Text(
@@ -316,7 +309,22 @@ class _CategoryCard extends StatelessWidget {
       case 'teeth':
         bg = const Color(0xFFE3F2FD);
         accent = const Color(0xFF1E88E5);
-        glyph = const Text('🦷', style: TextStyle(fontSize: 36));
+        glyph = Icon(Icons.medication_rounded, size: 40, color: accent);
+        break;
+      case 'painkillers':
+        bg = const Color(0xFFFFF3E0);
+        accent = const Color(0xFFFF9800);
+        glyph = Icon(Icons.healing_rounded, size: 40, color: accent);
+        break;
+      case 'vitamins':
+        bg = const Color(0xFFE8F5E9);
+        accent = const Color(0xFF4CAF50);
+        glyph = Icon(Icons.local_pharmacy_rounded, size: 40, color: accent);
+        break;
+      case 'antibiotics':
+        bg = const Color(0xFFE3F2FD);
+        accent = const Color(0xFF2196F3);
+        glyph = Icon(Icons.vaccines_rounded, size: 40, color: accent);
         break;
       case 'head':
       default:
@@ -478,9 +486,18 @@ class _ProductCard extends StatelessWidget {
   final String? imageUrl;
   final VoidCallback onTap;
 
+  static const _localImages = {
+    'paracetamol-500': 'assets/парацетамол.png',
+    'ibuprofen-400': 'assets/ибупрофин.webp',
+    'vitamin-d3': 'assets/д3.jpg',
+    'omeprazole-20': 'assets/омепразол.png',
+    'amoxicillin-500': 'assets/med1.png',
+    'loratadine-10': 'assets/med2.png',
+  };
+
   @override
   Widget build(BuildContext context) {
-    final title = name.isNotEmpty ? 'Лекарство $name' : 'Лекарство';
+    final title = name.isNotEmpty ? name : 'Лекарство';
     return GestureDetector(
       onTap: onTap,
       child: Container(
@@ -504,13 +521,7 @@ class _ProductCard extends StatelessWidget {
               flex: 5,
               child: ColoredBox(
                 color: Colors.white,
-                child: imageUrl != null && imageUrl!.isNotEmpty
-                    ? Image.network(
-                        imageUrl!,
-                        fit: BoxFit.contain,
-                        errorBuilder: (_, __, ___) => _productPlaceholder(id),
-                      )
-                    : _productPlaceholder(id),
+                child: _buildImage(),
               ),
             ),
             Padding(
@@ -533,7 +544,25 @@ class _ProductCard extends StatelessWidget {
     );
   }
 
-  Widget _productPlaceholder(String id) {
+  Widget _buildImage() {
+    final localPath = _localImages[id];
+    if (localPath != null) {
+      return Padding(
+        padding: const EdgeInsets.all(8),
+        child: Image.asset(
+          localPath,
+          fit: BoxFit.contain,
+          errorBuilder: (_, __, ___) => _productPlaceholder(),
+        ),
+      );
+    }
+    if (imageUrl != null && imageUrl!.isNotEmpty) {
+      return _mediImage(imageUrl!, BoxFit.contain, _productPlaceholder());
+    }
+    return _productPlaceholder();
+  }
+
+  Widget _productPlaceholder() {
     return Center(
       child: Icon(
         Icons.medication_rounded,
@@ -542,4 +571,11 @@ class _ProductCard extends StatelessWidget {
       ),
     );
   }
+}
+
+Widget _mediImage(String url, BoxFit fit, Widget placeholder) {
+  if (url.startsWith('assets/')) {
+    return Image.asset(url, fit: fit, errorBuilder: (_, __, ___) => placeholder);
+  }
+  return Image.network(url, fit: fit, errorBuilder: (_, __, ___) => placeholder);
 }

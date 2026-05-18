@@ -4,19 +4,19 @@ from pathlib import Path
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
 _BASE_DIR = Path(__file__).resolve().parents[1]
+_ENV_FILE = _BASE_DIR / ".env"
 
 
 class Settings(BaseSettings):
-    # Always read backend/.env regardless of where uvicorn is started from.
+    # Read from backend/.env when it exists, otherwise use environment variables.
     model_config = SettingsConfigDict(
-        env_file=str(_BASE_DIR / ".env"),
+        env_file=str(_ENV_FILE) if _ENV_FILE.exists() else None,
         env_file_encoding="utf-8",
         extra="ignore",
     )
 
-    # По умолчанию — SQLite (файл в backend/data/), без Docker и без установки PostgreSQL.
-    # Для PostgreSQL задайте в .env: postgresql+psycopg://user:pass@localhost:5432/medi
-    database_url: str = "sqlite:///./data/medi.db"
+    # PostgreSQL (Supabase). Задайте в backend/.env: DATABASE_URL=postgresql+psycopg://...
+    database_url: str = ""
     jwt_secret: str = "change-me-in-development-only"
     jwt_algorithm: str = "HS256"
     access_token_expire_minutes: int = 60 * 24 * 7

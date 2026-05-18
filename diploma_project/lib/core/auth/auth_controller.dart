@@ -30,15 +30,26 @@ class AuthController extends ChangeNotifier {
   late final ApiClient _client;
   String? _token;
   bool _ready = false;
-  /// null — профиль ещё не подгружали; иначе флаг с сервера.
   bool? _onboardingCompleted;
+  Map<String, dynamic>? _userProfile;
 
   ApiClient get client => _client;
   bool get isReady => _ready;
   bool get isLoggedIn => _token != null && _token!.isNotEmpty;
-
-  /// Нужен онбординг (только для залогиненных с известным профилем).
   bool get needsOnboarding => isLoggedIn && _onboardingCompleted == false;
+
+  Map<String, dynamic>? get userProfile => _userProfile;
+
+  String? get userName {
+    final u = _userProfile;
+    if (u == null) return null;
+    final full = (u['full_name'] as String?)?.trim();
+    if (full != null && full.isNotEmpty) return full;
+    final f = (u['first_name'] as String?)?.trim() ?? '';
+    final l = (u['last_name'] as String?)?.trim() ?? '';
+    final combined = '$f $l'.trim();
+    return combined.isNotEmpty ? combined : null;
+  }
 
   Future<void> _bootstrap() async {
     final p = await SharedPreferences.getInstance();
@@ -55,6 +66,7 @@ class AuthController extends ChangeNotifier {
     if (token == null || token.isEmpty) {
       await p.remove(_kToken);
       _onboardingCompleted = null;
+      _userProfile = null;
     } else {
       await p.setString(_kToken, token);
     }
@@ -66,11 +78,13 @@ class AuthController extends ChangeNotifier {
   Future<void> refreshUserProfile() async {
     if (!isLoggedIn) {
       _onboardingCompleted = null;
+      _userProfile = null;
       notifyListeners();
       return;
     }
     try {
       final r = await _client.dio.get<Map<String, dynamic>>('/users/me');
+      _userProfile = r.data;
       _onboardingCompleted = r.data?['onboarding_completed'] == true;
       notifyListeners();
     } catch (_) {
@@ -127,8 +141,4 @@ class AuthController extends ChangeNotifier {
 
   Future<void> logout() => _persist(null);
 
-  @override
-  void dispose() {
-    super.dispose();
-  }
 }

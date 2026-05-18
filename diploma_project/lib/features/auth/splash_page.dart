@@ -39,17 +39,24 @@ class _SplashPageState extends State<SplashPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: Colors.white,
       body: Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.local_pharmacy, size: 72, color: MediColors.primary),
-            const SizedBox(height: 16),
+            Image.asset(
+              'assets/logo.png',
+              width: 120,
+              height: 120,
+            ),
+            const SizedBox(height: 24),
             Text(
               'MEDI',
               style: Theme.of(context).textTheme.headlineLarge?.copyWith(
                     fontWeight: FontWeight.w800,
-                    letterSpacing: 2,
+                    letterSpacing: 4,
+                    color: MediColors.primary,
+                    fontSize: 36,
                   ),
             ),
           ],

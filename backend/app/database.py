@@ -1,43 +1,39 @@
 from collections.abc import Generator
-from pathlib import Path
 
 from sqlalchemy import create_engine
 from sqlalchemy.orm import DeclarativeBase, Session, sessionmaker
 
 from app.config import get_settings
 
-_BACKEND_ROOT = Path(__file__).resolve().parent.parent
-
 
 class Base(DeclarativeBase):
     pass
 
 
-def _resolve_database_url(url: str) -> tuple[str, dict]:
-    """
-    SQLite: относительный путь считается от папки backend/, создаём каталоги.
-    Возвращает (url, connect_args).
-    """
-    if not url.startswith("sqlite"):
-        return url, {}
-
-    rest = url.removeprefix("sqlite:///")
-    if rest.startswith("/") or (len(rest) > 1 and rest[1] == ":"):
-        path = Path(rest)
-    else:
-        path = (_BACKEND_ROOT / rest).resolve()
-    path.parent.mkdir(parents=True, exist_ok=True)
-    resolved = path.resolve().as_posix()
-    return f"sqlite:///{resolved}", {"check_same_thread": False}
+def _normalize_url(url: str) -> str:
+    if url.startswith("postgres://"):
+        url = "postgresql+psycopg://" + url[len("postgres://"):]
+    elif url.startswith("postgresql://") and not url.startswith("postgresql+"):
+        url = "postgresql+psycopg://" + url[len("postgresql://"):]
+    if url.startswith("postgresql+psycopg://"):
+        host = url.split("@")[-1].split("/")[0].split(":")[0]
+        if host not in ("localhost", "127.0.0.1", "::1") and "sslmode" not in url:
+            sep = "&" if "?" in url else "?"
+            url = url + sep + "sslmode=require"
+    return url
 
 
 settings = get_settings()
-_db_url, _sqlite_connect = _resolve_database_url(settings.database_url)
-_engine_kwargs: dict = {"pool_pre_ping": not settings.database_url.startswith("sqlite")}
-if _sqlite_connect:
-    _engine_kwargs["connect_args"] = _sqlite_connect
+_db_url = _normalize_url(settings.database_url)
 
-engine = create_engine(_db_url, **_engine_kwargs)
+_is_pooler = ":6543/" in _db_url
+engine = create_engine(
+    _db_url,
+    pool_pre_ping=True,
+    pool_size=3,
+    max_overflow=5,
+    connect_args={"prepare_threshold": 0} if _is_pooler else {},
+)
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 

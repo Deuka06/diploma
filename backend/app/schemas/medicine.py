@@ -3,6 +3,24 @@ from pydantic import BaseModel
 from app.schemas.common import ORMModel
 
 
+class SellerOut(ORMModel):
+    id: str
+    name: str
+    rating: float
+    review_count: int
+
+
+class SellerOfferOut(ORMModel):
+    id: int
+    medicine_id: str
+    seller_id: str
+    price: float
+    currency: str
+    delivery_text: str
+    tags: list[str] | None
+    seller: SellerOut
+
+
 class MedicineBrief(ORMModel):
     id: str
     name: str

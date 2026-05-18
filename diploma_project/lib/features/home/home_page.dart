@@ -1,8 +1,11 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
+import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
+import '../../core/auth/auth_controller.dart';
 import '../../core/theme/medi_theme.dart';
 
-/// Главная: рецепты / прогресс по макету MEDI.
 class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
@@ -13,14 +16,69 @@ class HomePage extends StatefulWidget {
 class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin {
   late final TabController _tab = TabController(length: 2, vsync: this);
 
+  List<Map<String, dynamic>> _treatments = [];
+  bool _loading = true;
+
+  static const _cardColors = [
+    Color(0xFFFFB3B8),
+    Color(0xFFFFF0B8),
+    Color(0xFFB8ECF0),
+    Color(0xFFB8F0C0),
+    Color(0xFFE8B8F0),
+  ];
+
+  @override
+  void initState() {
+    super.initState();
+    _loadTreatments();
+  }
+
   @override
   void dispose() {
     _tab.dispose();
     super.dispose();
   }
 
+  Future<void> _loadTreatments() async {
+    final auth = context.read<AuthController>();
+    setState(() => _loading = true);
+    try {
+      final res = await auth.client.dio.get<List<dynamic>>('/treatments');
+      setState(() {
+        _treatments = (res.data ?? []).cast<Map<String, dynamic>>();
+        _loading = false;
+      });
+    } on DioException {
+      setState(() => _loading = false);
+    }
+  }
+
+  List<Map<String, dynamic>> get _activeTreatments =>
+      _treatments.where((t) => t['is_completed'] == false).toList();
+
+  List<Map<String, dynamic>> get _allTreatments => _treatments;
+
+  Color _cardColor(int colorIndex) =>
+      _cardColors[colorIndex.clamp(0, _cardColors.length - 1)];
+
+  String _formatDays(int days) {
+    if (days <= 0) return 'Продолжается';
+    if (days % 100 >= 11 && days % 100 <= 19) return '$days дней';
+    switch (days % 10) {
+      case 1:
+        return '$days день';
+      case 2:
+      case 3:
+      case 4:
+        return '$days дня';
+      default:
+        return '$days дней';
+    }
+  }
+
   @override
   Widget build(BuildContext context) {
+    final userName = context.watch<AuthController>().userName ?? 'Медет';
     return Scaffold(
       backgroundColor: MediColors.homeBackground,
       body: SafeArea(
@@ -36,22 +94,27 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                     mainAxisAlignment: MainAxisAlignment.end,
                     children: [
                       IconButton(
-                        onPressed: () {},
-                        icon: Icon(Icons.notifications_none_rounded, color: MediColors.greetingPurple, size: 28),
+                        onPressed: () => context.push('/reminders'),
+                        icon: Icon(Icons.notifications_none_rounded,
+                            color: MediColors.greetingPurple, size: 28),
                         padding: EdgeInsets.zero,
                         constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
                       ),
                       const SizedBox(width: 4),
-                      const CircleAvatar(
+                      CircleAvatar(
                         radius: 22,
-                        backgroundColor: Color(0xFFFFC107),
-                        child: Text('🐕', style: TextStyle(fontSize: 22)),
+                        backgroundColor: MediColors.accentPurple.withValues(alpha: 0.15),
+                        child: Icon(
+                          Icons.person_rounded,
+                          size: 26,
+                          color: MediColors.accentPurple,
+                        ),
                       ),
                     ],
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    'Привет, Медет!',
+                    'Привет, $userName!',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           color: MediColors.greetingPurple,
                           fontWeight: FontWeight.w800,
@@ -66,26 +129,34 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
               padding: const EdgeInsets.fromLTRB(20, 4, 20, 0),
               child: AnimatedBuilder(
                 animation: _tab,
-                builder: (context, _) {
-                  return _HomeHeaderChips(
-                    index: _tab.index,
-                    onChanged: (i) => _tab.animateTo(i),
-                  );
-                },
+                builder: (context, _) => _HomeHeaderChips(
+                  index: _tab.index,
+                  onChanged: (i) => _tab.animateTo(i),
+                ),
               ),
             ),
             AnimatedBuilder(
               animation: _tab,
-              builder: (context, _) {
-                return _HomeSectionHeader(index: _tab.index);
-              },
+              builder: (context, _) => _HomeSectionHeader(index: _tab.index),
             ),
             Expanded(
               child: TabBarView(
                 controller: _tab,
-                children: const [
-                  _RecipesTab(),
-                  _ProgressTab(),
+                children: [
+                  _RecipesTab(
+                    treatments: _activeTreatments,
+                    loading: _loading,
+                    cardColor: _cardColor,
+                    formatDays: _formatDays,
+                    onRefresh: _loadTreatments,
+                  ),
+                  _ProgressTab(
+                    treatments: _allTreatments,
+                    loading: _loading,
+                    cardColor: _cardColor,
+                    formatDays: _formatDays,
+                    onRefresh: _loadTreatments,
+                  ),
                 ],
               ),
             ),
@@ -96,7 +167,6 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
   }
 }
 
-/// Вкладки шапки: активная — лавандовая капсула с иконкой и текстом; неактивная — только иконка.
 class _HomeHeaderChips extends StatelessWidget {
   const _HomeHeaderChips({required this.index, required this.onChanged});
 
@@ -139,11 +209,7 @@ class _HomeHeaderChips extends StatelessWidget {
 }
 
 class _HomeActiveTabPill extends StatelessWidget {
-  const _HomeActiveTabPill({
-    required this.onTap,
-    required this.icon,
-    required this.label,
-  });
+  const _HomeActiveTabPill({required this.onTap, required this.icon, required this.label});
 
   final VoidCallback onTap;
   final Widget icon;
@@ -198,16 +264,12 @@ class _HomeIconOnlyTab extends StatelessWidget {
       child: InkWell(
         onTap: onTap,
         customBorder: const CircleBorder(),
-        child: Padding(
-          padding: const EdgeInsets.all(12),
-          child: child,
-        ),
+        child: Padding(padding: const EdgeInsets.all(12), child: child),
       ),
     );
   }
 }
 
-/// Заголовок и подзаголовок блока под вкладками (меняются вместе с табом).
 class _HomeSectionHeader extends StatelessWidget {
   const _HomeSectionHeader({required this.index});
 
@@ -222,7 +284,7 @@ class _HomeSectionHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            isRecipes ? 'Твои лекарство' : 'Твой прогресс',
+            isRecipes ? 'Твои лекарства' : 'Твой прогресс',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: MediColors.greetingPurple,
                   fontWeight: FontWeight.w800,
@@ -246,7 +308,6 @@ class _HomeSectionHeader extends StatelessWidget {
   }
 }
 
-/// Иконка флакона с «+» как в дизайне (кольцо вокруг «+» под цвет фона капсулы).
 class _PrescriptionIcon extends StatelessWidget {
   const _PrescriptionIcon({required this.color, this.ringColor});
 
@@ -272,7 +333,8 @@ class _PrescriptionIcon extends StatelessWidget {
               decoration: BoxDecoration(
                 color: color,
                 shape: BoxShape.circle,
-                border: Border.all(color: ringColor ?? MediColors.tabActiveLavender, width: 1.5),
+                border: Border.all(
+                    color: ringColor ?? MediColors.tabActiveLavender, width: 1.5),
               ),
               child: const Icon(Icons.add, size: 10, color: Colors.white),
             ),
@@ -283,52 +345,254 @@ class _PrescriptionIcon extends StatelessWidget {
   }
 }
 
+// Вкладка "Рецепты" — активные лечения
 class _RecipesTab extends StatelessWidget {
-  const _RecipesTab();
+  const _RecipesTab({
+    required this.treatments,
+    required this.loading,
+    required this.cardColor,
+    required this.formatDays,
+    required this.onRefresh,
+  });
 
-  static const _cards = [
-    _MedCardData('Витамин С', '22 дня', '19:00 – 20:00', Color(0xFFFFB3B8)),
-    _MedCardData('Витамин С', '10 дней', '19:00 – 20:00', Color(0xFFFFF0B8)),
-    _MedCardData('Витамин С', '3 дня', '19:00 – 20:00', Color(0xFFB8ECF0)),
-  ];
+  final List<Map<String, dynamic>> treatments;
+  final bool loading;
+  final Color Function(int) cardColor;
+  final String Function(int) formatDays;
+  final Future<void> Function() onRefresh;
 
   @override
   Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-      children: [
-        ..._cards.map((c) => Padding(
-              padding: const EdgeInsets.only(bottom: 14),
-              child: _MedicationCard(data: c),
-            )),
-      ],
+    if (loading) {
+      return const Center(
+          child: CircularProgressIndicator(color: MediColors.accentPurple));
+    }
+    if (treatments.isEmpty) {
+      return RefreshIndicator(
+        color: MediColors.accentPurple,
+        onRefresh: onRefresh,
+        child: ListView(
+          padding: const EdgeInsets.fromLTRB(20, 8, 20, 24),
+          children: const [
+            SizedBox(height: 60),
+            Center(
+              child: Text(
+                'Нет активных лечений.\nДобавьте в разделе Обзор.',
+                textAlign: TextAlign.center,
+                style: TextStyle(color: MediColors.textMuted, fontSize: 15),
+              ),
+            ),
+          ],
+        ),
+      );
+    }
+    return RefreshIndicator(
+      color: MediColors.accentPurple,
+      onRefresh: onRefresh,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+        children: treatments.map((t) {
+          final colorIdx = (t['color_index'] as int?) ?? 0;
+          final medicineName =
+              (t['medicine_name'] as String?)?.isNotEmpty == true
+                  ? t['medicine_name'] as String
+                  : t['disease_name'] as String;
+          final durationDays = (t['duration_days'] as int?) ?? 0;
+          final intakeTime = t['intake_time'] as String? ?? '';
+          return Padding(
+            padding: const EdgeInsets.only(bottom: 14),
+            child: _MedicationCard(
+              title: medicineName,
+              duration: formatDays(durationDays),
+              time: intakeTime,
+              color: cardColor(colorIdx),
+            ),
+          );
+        }).toList(),
+      ),
     );
   }
 }
 
-class _MedCardData {
-  const _MedCardData(this.title, this.duration, this.time, this.color);
+// Вкладка "Прогресс" — мини-карточки + статистика
+class _ProgressTab extends StatelessWidget {
+  const _ProgressTab({
+    required this.treatments,
+    required this.loading,
+    required this.cardColor,
+    required this.formatDays,
+    required this.onRefresh,
+  });
+
+  final List<Map<String, dynamic>> treatments;
+  final bool loading;
+  final Color Function(int) cardColor;
+  final String Function(int) formatDays;
+  final Future<void> Function() onRefresh;
+
+  @override
+  Widget build(BuildContext context) {
+    if (loading) {
+      return const Center(
+          child: CircularProgressIndicator(color: MediColors.accentPurple));
+    }
+
+    final active = treatments.where((t) => t['is_completed'] == false).toList();
+    final progressVal = active.isEmpty
+        ? 0.0
+        : active
+                .map((t) => (t['progress'] as num).toDouble())
+                .reduce((a, b) => a + b) /
+            active.length;
+
+    return RefreshIndicator(
+      color: MediColors.accentPurple,
+      onRefresh: onRefresh,
+      child: ListView(
+        padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
+        children: [
+          Container(
+            padding: const EdgeInsets.all(22),
+            decoration: BoxDecoration(
+              color: MediColors.accentPurple,
+              borderRadius: BorderRadius.circular(28),
+              boxShadow: [
+                BoxShadow(
+                  color: MediColors.accentPurple.withValues(alpha: 0.35),
+                  blurRadius: 20,
+                  offset: const Offset(0, 10),
+                ),
+              ],
+            ),
+            child: Row(
+              children: [
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        active.isNotEmpty
+                            ? active.first['disease_name'] as String
+                            : 'Нет активных',
+                        style: const TextStyle(
+                          color: Colors.white,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w800,
+                        ),
+                      ),
+                      const SizedBox(height: 6),
+                      Text(
+                        'Ваш еженедельный отчет',
+                        style: TextStyle(
+                          color: Colors.white.withValues(alpha: 0.88),
+                          fontSize: 13,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+                SizedBox(
+                  width: 88,
+                  height: 88,
+                  child: Stack(
+                    fit: StackFit.expand,
+                    children: [
+                      CircularProgressIndicator(
+                        value: progressVal,
+                        strokeWidth: 7,
+                        backgroundColor: Colors.white24,
+                        color: Colors.white,
+                        strokeCap: StrokeCap.round,
+                      ),
+                      Center(
+                        child: Text(
+                          '${(progressVal * 100).round()}%',
+                          style: const TextStyle(
+                            color: Colors.white,
+                            fontWeight: FontWeight.w800,
+                            fontSize: 18,
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 16),
+          SizedBox(
+            height: 200,
+            child: Row(
+              crossAxisAlignment: CrossAxisAlignment.stretch,
+              children: [
+                Expanded(
+                  flex: 11,
+                  child: _BigStatCard(
+                    color: const Color(0xFFFF9F6B),
+                    icon: Icons.local_fire_department_rounded,
+                    value: '2,000',
+                    label: 'Калл',
+                  ),
+                ),
+                const SizedBox(width: 12),
+                Expanded(
+                  flex: 10,
+                  child: Column(
+                    children: [
+                      Expanded(
+                        child: _SmallStatCard(
+                          color: const Color(0xFF5BA4E5),
+                          icon: Icons.water_drop_rounded,
+                          value: '50',
+                          label: 'Стакан воды',
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      Expanded(
+                        child: _SmallStatCard(
+                          color: const Color(0xFFFF9A9A),
+                          icon: Icons.directions_walk_rounded,
+                          value: '10,000',
+                          label: 'Шаги',
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+class _MedicationCard extends StatelessWidget {
+  const _MedicationCard({
+    required this.title,
+    required this.duration,
+    required this.time,
+    required this.color,
+  });
+
   final String title;
   final String duration;
   final String time;
   final Color color;
-}
-
-class _MedicationCard extends StatelessWidget {
-  const _MedicationCard({required this.data});
-
-  final _MedCardData data;
 
   @override
   Widget build(BuildContext context) {
     return Container(
       height: 128,
       decoration: BoxDecoration(
-        color: data.color,
+        color: color,
         borderRadius: BorderRadius.circular(28),
         boxShadow: [
           BoxShadow(
-            color: data.color.withOpacity(0.45),
+            color: color.withValues(alpha: 0.45),
             blurRadius: 16,
             offset: const Offset(0, 8),
           ),
@@ -343,31 +607,30 @@ class _MedicationCard extends StatelessWidget {
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
                 Text(
-                  data.title,
+                  title,
                   style: const TextStyle(
-                    fontWeight: FontWeight.w800,
-                    fontSize: 20,
-                    color: Color(0xFF2D2D2D),
-                  ),
+                      fontWeight: FontWeight.w800,
+                      fontSize: 20,
+                      color: Color(0xFF2D2D2D)),
                 ),
                 const SizedBox(height: 6),
                 Text(
-                  data.duration,
+                  duration,
                   style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                    color: Colors.black.withOpacity(0.55),
-                  ),
+                      fontWeight: FontWeight.w600,
+                      fontSize: 15,
+                      color: Colors.black.withValues(alpha: 0.55)),
                 ),
-                const SizedBox(height: 4),
-                Text(
-                  data.time,
-                  style: TextStyle(
-                    fontWeight: FontWeight.w600,
-                    fontSize: 15,
-                    color: Colors.black.withOpacity(0.55),
+                if (time.isNotEmpty) ...[
+                  const SizedBox(height: 4),
+                  Text(
+                    time,
+                    style: TextStyle(
+                        fontWeight: FontWeight.w600,
+                        fontSize: 15,
+                        color: Colors.black.withValues(alpha: 0.55)),
                   ),
-                ),
+                ],
               ],
             ),
           ),
@@ -375,135 +638,11 @@ class _MedicationCard extends StatelessWidget {
             width: 72,
             height: 88,
             alignment: Alignment.center,
-            child: Icon(Icons.medication_liquid_rounded, size: 56, color: Colors.white.withOpacity(0.95)),
+            child: Icon(Icons.medication_liquid_rounded,
+                size: 56, color: Colors.white.withValues(alpha: 0.95)),
           ),
         ],
       ),
-    );
-  }
-}
-
-class _ProgressTab extends StatelessWidget {
-  const _ProgressTab();
-
-  @override
-  Widget build(BuildContext context) {
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 24),
-      children: [
-        Container(
-          padding: const EdgeInsets.all(22),
-          decoration: BoxDecoration(
-            color: MediColors.accentPurple,
-            borderRadius: BorderRadius.circular(28),
-            boxShadow: [
-              BoxShadow(
-                color: MediColors.accentPurple.withOpacity(0.35),
-                blurRadius: 20,
-                offset: const Offset(0, 10),
-              ),
-            ],
-          ),
-          child: Row(
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    const Text(
-                      'Лечения Грипп',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 20,
-                        fontWeight: FontWeight.w800,
-                      ),
-                    ),
-                    const SizedBox(height: 6),
-                    Text(
-                      'Ваш еженедельный отчет',
-                      style: TextStyle(
-                        color: Colors.white.withOpacity(0.88),
-                        fontSize: 13,
-                        fontWeight: FontWeight.w500,
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              SizedBox(
-                width: 88,
-                height: 88,
-                child: Stack(
-                  fit: StackFit.expand,
-                  children: [
-                    CircularProgressIndicator(
-                      value: 0.65,
-                      strokeWidth: 7,
-                      backgroundColor: Colors.white24,
-                      color: Colors.white,
-                      strokeCap: StrokeCap.round,
-                    ),
-                    Center(
-                      child: Text(
-                        '65%',
-                        style: TextStyle(
-                          color: Colors.white,
-                          fontWeight: FontWeight.w800,
-                          fontSize: 18,
-                          shadows: [Shadow(color: Colors.black26, blurRadius: 4)],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-        const SizedBox(height: 16),
-        SizedBox(
-          height: 200,
-          child: Row(
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Expanded(
-                flex: 11,
-                child: _BigStatCard(
-                  color: const Color(0xFFFF9F6B),
-                  icon: Icons.local_fire_department_rounded,
-                  value: '2,000',
-                  label: 'Калл',
-                ),
-              ),
-              const SizedBox(width: 12),
-              Expanded(
-                flex: 10,
-                child: Column(
-                  children: [
-                    Expanded(
-                      child: _SmallStatCard(
-                        color: const Color(0xFF5BA4E5),
-                        icon: Icons.water_drop_rounded,
-                        value: '50',
-                        label: 'Стакан воды',
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    Expanded(
-                      child: _SmallStatCard(
-                        color: const Color(0xFFFF9A9A),
-                        icon: Icons.directions_walk_rounded,
-                        value: '10,000',
-                        label: 'Шаги',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ],
-          ),
-        ),
-      ],
     );
   }
 }
@@ -529,7 +668,10 @@ class _BigStatCard extends StatelessWidget {
         color: color,
         borderRadius: BorderRadius.circular(26),
         boxShadow: [
-          BoxShadow(color: color.withOpacity(0.35), blurRadius: 14, offset: const Offset(0, 8)),
+          BoxShadow(
+              color: color.withValues(alpha: 0.35),
+              blurRadius: 14,
+              offset: const Offset(0, 8)),
         ],
       ),
       child: Column(
@@ -537,18 +679,16 @@ class _BigStatCard extends StatelessWidget {
         children: [
           Icon(icon, color: Colors.white, size: 32),
           const Spacer(),
-          Text(
-            value,
-            style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 28),
-          ),
-          Text(
-            label,
-            style: TextStyle(
-              color: Colors.white.withOpacity(0.92),
-              fontWeight: FontWeight.w600,
-              fontSize: 14,
-            ),
-          ),
+          Text(value,
+              style: const TextStyle(
+                  color: Colors.white,
+                  fontWeight: FontWeight.w900,
+                  fontSize: 28)),
+          Text(label,
+              style: TextStyle(
+                  color: Colors.white.withValues(alpha: 0.92),
+                  fontWeight: FontWeight.w600,
+                  fontSize: 14)),
         ],
       ),
     );
@@ -576,7 +716,10 @@ class _SmallStatCard extends StatelessWidget {
         color: color,
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
-          BoxShadow(color: color.withOpacity(0.3), blurRadius: 12, offset: const Offset(0, 6)),
+          BoxShadow(
+              color: color.withValues(alpha: 0.3),
+              blurRadius: 12,
+              offset: const Offset(0, 6)),
         ],
       ),
       child: Row(
@@ -588,20 +731,18 @@ class _SmallStatCard extends StatelessWidget {
               crossAxisAlignment: CrossAxisAlignment.start,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Text(
-                  value,
-                  style: const TextStyle(color: Colors.white, fontWeight: FontWeight.w900, fontSize: 20),
-                ),
-                Text(
-                  label,
-                  maxLines: 2,
-                  overflow: TextOverflow.ellipsis,
-                  style: TextStyle(
-                    color: Colors.white.withOpacity(0.92),
-                    fontWeight: FontWeight.w600,
-                    fontSize: 12,
-                  ),
-                ),
+                Text(value,
+                    style: const TextStyle(
+                        color: Colors.white,
+                        fontWeight: FontWeight.w900,
+                        fontSize: 20)),
+                Text(label,
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
+                    style: TextStyle(
+                        color: Colors.white.withValues(alpha: 0.92),
+                        fontWeight: FontWeight.w600,
+                        fontSize: 12)),
               ],
             ),
           ),

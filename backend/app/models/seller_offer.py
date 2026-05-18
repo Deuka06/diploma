@@ -1,8 +1,13 @@
+from typing import TYPE_CHECKING
+
 from sqlalchemy import JSON, Float, ForeignKey, String, Text
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from app.database import Base
-from app.models.seller import Seller
+
+if TYPE_CHECKING:
+    from app.models.medicine import Medicine
+    from app.models.seller import Seller
 
 
 class SellerOffer(Base):
@@ -18,4 +23,5 @@ class SellerOffer(Base):
     delivery_text: Mapped[str] = mapped_column(Text, nullable=False, default="")
     tags: Mapped[list | None] = mapped_column(JSON, nullable=True)
 
-    seller: Mapped[Seller] = relationship("Seller", lazy="joined")
+    medicine: Mapped["Medicine"] = relationship("Medicine", back_populates="seller_offers")
+    seller: Mapped["Seller"] = relationship("Seller", lazy="joined")
