@@ -7,7 +7,7 @@ from app.database import get_db
 from app.deps_auth import get_current_user
 from app.models.treatment import Treatment
 from app.models.user import User
-from app.schemas.treatment import TreatmentIn, TreatmentOut
+from app.schemas.treatment import TreatmentIn, TreatmentOut, TreatmentProgressPatch
 
 router = APIRouter(prefix="/treatments", tags=["treatments"])
 
@@ -15,15 +15,21 @@ router = APIRouter(prefix="/treatments", tags=["treatments"])
 def _to_out(t: Treatment) -> TreatmentOut:
     today = date.today()
     if t.end_date:
-        total = max((t.end_date - t.start_date).days, 1)
+        duration_days = (t.end_date - t.start_date).days
+    else:
+        duration_days = 0
+
+    if t.manual_progress is not None:
+        progress = round(min(max(t.manual_progress, 0.0), 1.0), 2)
+        is_completed = progress >= 1.0
+    elif t.end_date:
+        total = max(duration_days, 1)
         elapsed = max((today - t.start_date).days, 0)
         progress = round(min(elapsed / total, 1.0), 2)
         is_completed = progress >= 1.0
-        duration_days = (t.end_date - t.start_date).days
     else:
         progress = 0.0
         is_completed = False
-        duration_days = 0
     return TreatmentOut(
         id=t.id,
         disease_name=t.disease_name,
@@ -78,6 +84,22 @@ def create_treatment(
         is_active=body.is_active,
     )
     db.add(t)
+    db.commit()
+    db.refresh(t)
+    return _to_out(t)
+
+
+@router.patch("/{treatment_id}/progress", response_model=TreatmentOut)
+def update_treatment_progress(
+    treatment_id: int,
+    body: TreatmentProgressPatch,
+    db: Session = Depends(get_db),
+    user: User = Depends(get_current_user),
+) -> TreatmentOut:
+    t = db.get(Treatment, treatment_id)
+    if t is None or t.user_id != user.id:
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Лечение не найдено")
+    t.manual_progress = round(min(max(body.progress, 0.0), 1.0), 4)
     db.commit()
     db.refresh(t)
     return _to_out(t)

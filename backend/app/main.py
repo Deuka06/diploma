@@ -1,6 +1,7 @@
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
+from sqlalchemy import text
 from fastapi.middleware.cors import CORSMiddleware
 
 from app.config import get_settings
@@ -17,16 +18,29 @@ from app.routers.treatments import router as treatments_router
 from app.routers.users import router as users_router
 
 
+def _run_migrations() -> None:
+    """Apply lightweight schema migrations that create_all cannot handle."""
+    with engine.connect() as conn:
+        conn.execute(
+            text(
+                "ALTER TABLE treatments "
+                "ADD COLUMN IF NOT EXISTS manual_progress FLOAT"
+            )
+        )
+        conn.commit()
+
+
 @asynccontextmanager
 async def lifespan(_app: FastAPI):
     Base.metadata.create_all(bind=engine)
+    _run_migrations()
     yield
 
 
 settings = get_settings()
 app = FastAPI(
     title="MEDI API",
-    description="Backend для дипломного проекта MEDI (пациент, лекарства, аллергии).",
+    description="API for MEDI - Your Personal Medication Management Assistant",
     version="0.2.0",
     lifespan=lifespan,
 )
