@@ -43,7 +43,7 @@ class _HelpPageState extends State<HelpPage> {
     return Scaffold(
       appBar: AppBar(
         leading: BackButton(onPressed: () => context.pop()),
-        title: const Text('Помощь'),
+        title: const Text('Көмек'),
       ),
       body: _loading
           ? const Center(child: CircularProgressIndicator())

@@ -15,8 +15,8 @@ void main() async {
 void _scheduleTestNotification() async {
   await NotificationService().scheduleDelayedNotification(
     id: 9999,
-    title: 'Пора принимать таблетки!',
-    body: 'Не забудьте принять лекарство по расписанию',
+    title: 'Дәрі қабылдау уақыты!',
+    body: 'Кестеге сәйкес дәрі қабылдауды ұмытпаңыз',
     delay: const Duration(seconds: 50),
   );
 }

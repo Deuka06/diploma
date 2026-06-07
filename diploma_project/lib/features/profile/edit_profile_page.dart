@@ -127,7 +127,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Изменить профиль',
+                    'Профильді өзгерту',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w800,
@@ -135,13 +135,13 @@ class _EditProfilePageState extends State<EditProfilePage> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Text('Имя', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF6B6B6B))),
+                  const Text('Аты', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF6B6B6B))),
                   const SizedBox(height: 8),
-                  _Field(controller: _firstNameCtrl, hint: 'Введите имя', fillColor: _fieldFill),
+                  _Field(controller: _firstNameCtrl, hint: 'Атын енгізіңіз', fillColor: _fieldFill),
                   const SizedBox(height: 16),
-                  const Text('Фамилия', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF6B6B6B))),
+                  const Text('Тегі', style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF6B6B6B))),
                   const SizedBox(height: 8),
-                  _Field(controller: _lastNameCtrl, hint: 'Введите фамилию', fillColor: _fieldFill),
+                  _Field(controller: _lastNameCtrl, hint: 'Тегін енгізіңіз', fillColor: _fieldFill),
                   const SizedBox(height: 32),
                   SizedBox(
                     width: double.infinity,
@@ -164,7 +164,7 @@ class _EditProfilePageState extends State<EditProfilePage> {
                                 color: Colors.white,
                               ),
                             )
-                          : const Text('Сохранить'),
+                          : const Text('Сақтау'),
                     ),
                   ),
                 ],

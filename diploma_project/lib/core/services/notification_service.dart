@@ -61,8 +61,8 @@ class NotificationService {
   NotificationDetails _buildNotificationDetails() {
     const androidDetails = AndroidNotificationDetails(
       'medi_reminders',
-      'Напоминания о лекарствах',
-      channelDescription: 'Уведомления о приёме лекарств',
+      'Дәрілер туралы еске салулар',
+      channelDescription: 'Дәрі қабылдау туралы хабарландырулар',
       importance: Importance.high,
       priority: Priority.high,
       icon: '@mipmap/ic_launcher',
@@ -130,10 +130,10 @@ class NotificationService {
     required int hour,
     required int minute,
   }) async {
-    final title = 'Время принять $medicineName';
+    final title = '$medicineName қабылдау уақыты';
     final body = dosage != null && dosage.isNotEmpty
-        ? 'Дозировка: $dosage'
-        : 'Не забудьте принять лекарство';
+        ? 'Дозасы: $dosage'
+        : 'Дәрі қабылдауды ұмытпаңыз';
 
     await scheduleDailyNotification(
       id: reminderId,

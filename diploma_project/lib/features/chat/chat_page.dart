@@ -40,7 +40,7 @@ class _ChatPageState extends State<ChatPage> {
     return _ChatMessage(
       isUser: false,
       text:
-          'Здравствуйте! Я помощник MEDI на базе ИИ. Спросите о приложении или общих вопросах здоровья — это не замена очной консультации врача.',
+          'Сәлеметсіз бе! Мен MEDI қолданбасының ЖИ негізіндегі көмекшісімін. Қолданба немесе денсаулық туралы жалпы сұрақтар қойыңыз — бұл дәрігердің орнын баспайды.',
       at: DateTime.now(),
     );
   }
@@ -125,17 +125,17 @@ class _ChatPageState extends State<ChatPage> {
     final confirmed = await showDialog<bool>(
       context: context,
       builder: (ctx) => AlertDialog(
-        title: const Text('Очистить историю?'),
-        content: const Text('Все сообщения будут удалены безвозвратно.'),
+        title: const Text('Тарихты тазалау?'),
+        content: const Text('Барлық хабарламалар қайтарымсыз жойылады.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(ctx, false),
-            child: const Text('Отмена'),
+            child: const Text('Болдырмау'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(ctx, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Очистить'),
+            child: const Text('Тазалау'),
           ),
         ],
       ),
@@ -187,16 +187,16 @@ class _ChatPageState extends State<ChatPage> {
       final reply = res.data?['reply'] as String? ?? '';
       if (!mounted) return;
       setState(() {
-        _messages.add(_ChatMessage(isUser: false, text: reply.isEmpty ? 'Пустой ответ' : reply, at: DateTime.now()));
+        _messages.add(_ChatMessage(isUser: false, text: reply.isEmpty ? 'Бос жауап' : reply, at: DateTime.now()));
       });
       _persistMessages();
       _scrollToEnd();
     } on DioException catch (e) {
       if (!mounted) return;
-      final msg = dioErrorMessage(e) ?? 'Ошибка сети';
+      final msg = dioErrorMessage(e) ?? 'Желі қатесі';
       ScaffoldMessenger.of(context).showSnackBar(SnackBar(content: Text(msg)));
       setState(() {
-        _messages.add(_ChatMessage(isUser: false, text: 'Не удалось получить ответ. Попробуйте ещё раз.', at: DateTime.now()));
+        _messages.add(_ChatMessage(isUser: false, text: 'Жауап алу мүмкін болмады. Қайталап көріңіз.', at: DateTime.now()));
       });
       _persistMessages();
       _scrollToEnd();
@@ -239,7 +239,7 @@ class _ChatPageState extends State<ChatPage> {
                   ),
                   IconButton(
                     onPressed: _clearHistory,
-                    tooltip: 'Очистить историю',
+                    tooltip: 'Тарихты тазалау',
                     icon: Icon(
                       Icons.delete_outline_rounded,
                       color: MediColors.chatTimestamp,
@@ -280,7 +280,7 @@ class _ChatPageState extends State<ChatPage> {
                   children: [
                     IconButton(
                       onPressed: () => ScaffoldMessenger.of(context).showSnackBar(
-                        const SnackBar(content: Text('Вложения появятся позже')),
+                        const SnackBar(content: Text('Тіркемелер кейінірек қосылады')),
                       ),
                       icon: Icon(Icons.attach_file_rounded, color: MediColors.greetingPurple.withValues(alpha: 0.9)),
                     ),
@@ -318,7 +318,7 @@ class _ChatPageState extends State<ChatPage> {
                                 height: 1.25,
                               ),
                               decoration: InputDecoration(
-                                hintText: 'Написать...',
+                                hintText: 'Жазыңыз...',
                                 hintStyle: TextStyle(
                                   color: MediColors.chatTimestamp,
                                   fontSize: 16,

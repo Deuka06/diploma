@@ -89,7 +89,7 @@ class _SellersOffersPanelState extends State<_SellersOffersPanel> {
       });
     } on DioException catch (e) {
       setState(() {
-        _err = e.message ?? 'Ошибка загрузки';
+        _err = e.message ?? 'Жүктеу қатесі';
         _loading = false;
       });
     }
@@ -123,7 +123,7 @@ class _SellersOffersPanelState extends State<_SellersOffersPanel> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               const Text(
-                'Продавцы',
+                'Сатушылар',
                 style: TextStyle(
                   fontSize: 28,
                   fontWeight: FontWeight.w800,
@@ -138,7 +138,7 @@ class _SellersOffersPanelState extends State<_SellersOffersPanel> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     Text(
-                      'Доставка',
+                      'Жеткізу',
                       style: TextStyle(
                         fontSize: 15,
                         fontWeight: FontWeight.w500,
@@ -148,13 +148,13 @@ class _SellersOffersPanelState extends State<_SellersOffersPanel> {
                     ),
                     const SizedBox(width: 18),
                     _FilterChipPill(
-                      label: 'Express, за 3 часа',
+                      label: 'Express, 3 сағатта',
                       selected: _filterTag == 'express',
                       onTap: () => _setFilter('express'),
                     ),
                     const SizedBox(width: 8),
                     _FilterChipPill(
-                      label: 'Сегодня',
+                      label: 'Бүгін',
                       selected: _filterTag == 'today',
                       onTap: () => _setFilter('today'),
                     ),
@@ -179,8 +179,8 @@ class _SellersOffersPanelState extends State<_SellersOffersPanel> {
                               children: [
                                 Text(
                                   _filterTag != null
-                                      ? 'Нет продавцов по выбранному фильтру.'
-                                      : 'Пока нет предложений по этому препарату.\nЗапустите: PYTHONPATH=. python scripts/seed_medicines.py',
+                                      ? 'Таңдалған сүзгі бойынша сатушылар жоқ.'
+                                      : 'Бұл препарат бойынша ұсыныстар әзірше жоқ.\nІске қосыңыз: PYTHONPATH=. python scripts/seed_medicines.py',
                                   textAlign: TextAlign.center,
                                   style: TextStyle(
                                     color: MediColors.textMuted.withValues(alpha: 0.9),
@@ -200,7 +200,7 @@ class _SellersOffersPanelState extends State<_SellersOffersPanel> {
                                       foregroundColor: Colors.white,
                                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                                     ),
-                                    child: const Text('Показать всех'),
+                                    child: const Text('Барлығын көрсету'),
                                   ),
                                 ],
                               ],
@@ -360,7 +360,7 @@ class _SellerRow extends StatelessWidget {
                   const SizedBox(width: 8),
                   Expanded(
                     child: Text(
-                      '$reviewCount отзывов',
+                      '$reviewCount пікір',
                       style: TextStyle(
                         fontSize: 13,
                         color: MediColors.textMuted.withValues(alpha: 0.95),
@@ -421,7 +421,7 @@ class _SellerRow extends StatelessWidget {
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(22)),
               textStyle: const TextStyle(fontWeight: FontWeight.w700, fontSize: 14),
             ),
-            child: const Text('Выбрать'),
+            child: const Text('Таңдау'),
           ),
         ),
       ],

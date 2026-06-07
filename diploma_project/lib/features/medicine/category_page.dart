@@ -46,7 +46,7 @@ class _CategoryPageState extends State<CategoryPage> {
       });
     } on DioException catch (e) {
       setState(() {
-        _err = e.message ?? 'Ошибка загрузки';
+        _err = e.message ?? 'Жүктеу қатесі';
         _loading = false;
       });
     }
@@ -55,26 +55,26 @@ class _CategoryPageState extends State<CategoryPage> {
   String get _pageTitle {
     switch (widget.categoryId) {
       case 'teeth':
-        return 'Лекарство для зубов';
+        return 'Тіс дәрісі';
       case 'heart':
-        return 'Лекарство для сердце';
+        return 'Жүрек дәрісі';
       case 'head':
-        return 'Лекарство для головы';
+        return 'Бас дәрісі';
       default:
-        return 'Лекарства';
+        return 'Дәрілер';
     }
   }
 
   String get _categorySubtitle {
     switch (widget.categoryId) {
       case 'teeth':
-        return 'Категория зубы';
+        return 'Тіс санаты';
       case 'heart':
-        return 'Категория сердце';
+        return 'Жүрек санаты';
       case 'head':
-        return 'Категория голова';
+        return 'Бас санаты';
       default:
-        return 'Категория';
+        return 'Санат';
     }
   }
 
@@ -96,7 +96,7 @@ class _CategoryPageState extends State<CategoryPage> {
                   color: MediColors.text.withValues(alpha: 0.85),
                 ),
                 label: Text(
-                  'Назад',
+                  'Артқа',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,
@@ -229,7 +229,7 @@ class _MedicineGridCard extends StatelessWidget {
                 ),
                 const SizedBox(height: 8),
                 const Text(
-                  'Лекарство',
+                  'Дәрі',
                   textAlign: TextAlign.center,
                   maxLines: 1,
                   overflow: TextOverflow.ellipsis,

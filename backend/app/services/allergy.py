@@ -69,7 +69,7 @@ def build_safety_payload(db: Session, medicine: Medicine, user: User | None) -> 
         )
     warning = None
     if conflict:
-        warning = f"Содержит {conflict}, на который у вас аллергия"
+        warning = f"Сізде аллергия бар {conflict} құрамында бар"
     return {
         "is_recommended": is_recommended,
         "conflict_allergen": conflict,

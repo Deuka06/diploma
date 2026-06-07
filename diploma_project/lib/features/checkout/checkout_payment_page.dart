@@ -25,7 +25,7 @@ class CheckoutPaymentPage extends StatelessWidget {
           onPressed: () => context.pop(),
         ),
         title: const Text(
-          'Оплата',
+          'Төлем',
           style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
         ),
         centerTitle: true,
@@ -54,17 +54,17 @@ class CheckoutPaymentPage extends StatelessWidget {
                     ),
                     child: Column(
                       children: [
-                        _PriceRow(label: 'Товар', value: p, boldValue: false),
+                        _PriceRow(label: 'Тауар', value: p, boldValue: false),
                         const Divider(height: 24),
-                        _PriceRow(label: 'Сумма покупки', value: p, boldValue: false),
+                        _PriceRow(label: 'Сатып алу сомасы', value: p, boldValue: false),
                         const Divider(height: 24),
-                        _PriceRow(label: 'К оплате', value: p, boldValue: true),
+                        _PriceRow(label: 'Төленетін сома', value: p, boldValue: true),
                       ],
                     ),
                   ),
                   const SizedBox(height: 24),
                   const Text(
-                    'Способ оплаты',
+                    'Төлем әдісі',
                     style: TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w800,
@@ -106,7 +106,7 @@ class CheckoutPaymentPage extends StatelessWidget {
                           const SizedBox(width: 12),
                           const Expanded(
                             child: Text(
-                              'Банковская карта',
+                              'Банк картасы',
                               style: TextStyle(
                                 fontSize: 17,
                                 fontWeight: FontWeight.w700,
@@ -140,7 +140,7 @@ class CheckoutPaymentPage extends StatelessWidget {
                 child: FilledButton(
                   onPressed: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Оплата (MVP): заказ оформлен')),
+                      const SnackBar(content: Text('Төлем (MVP): тапсырыс рәсімделді')),
                     );
                   },
                   style: FilledButton.styleFrom(
@@ -150,7 +150,7 @@ class CheckoutPaymentPage extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
                   ),
-                  child: const Text('Перейти к оплате'),
+                  child: const Text('Төлемге өту'),
                 ),
               ),
             ),

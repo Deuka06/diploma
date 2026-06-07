@@ -93,7 +93,7 @@ class _ProfilePageState extends State<ProfilePage> {
                           children: [
                             _ProfileMenuRow(
                               icon: Icons.edit_outlined,
-                              label: 'Изменить профиль',
+                              label: 'Профильді өзгерту',
                               onTap: () async {
                                 await context.push('/edit-profile');
                                 if (context.mounted) _load();
@@ -106,17 +106,17 @@ class _ProfilePageState extends State<ProfilePage> {
                             ),
                             _ProfileMenuRow(
                               icon: Icons.edit_note_outlined,
-                              label: 'Пройти проверку',
+                              label: 'Тексеруден өту',
                               onTap: () => context.push('/onboarding'),
                             ),
                             _ProfileMenuRow(
                               icon: Icons.help_outline_rounded,
-                              label: 'Помощь',
+                              label: 'Көмек',
                               onTap: () => context.push('/help'),
                             ),
                             _ProfileMenuRow(
                               icon: Icons.logout,
-                              label: 'Выйти',
+                              label: 'Шығу',
                               danger: true,
                               showDividerAbove: true,
                               onTap: () async {
@@ -314,7 +314,7 @@ class _ParcelsHighlightTile extends StatelessWidget {
               const SizedBox(width: 14),
               const Expanded(
                 child: Text(
-                  'Посылки и история покупок',
+                  'Жөнелтімдер және сатып алу тарихы',
                   style: TextStyle(
                     fontSize: 16,
                     fontWeight: FontWeight.w600,

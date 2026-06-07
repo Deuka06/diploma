@@ -57,7 +57,7 @@ def update_appointment(
 ) -> AppointmentOut:
     appt = db.get(Appointment, appointment_id)
     if appt is None or appt.user_id != user.id:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Запись не найдена")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Жазба табылмады")
     for k, v in body.model_dump(exclude_unset=True).items():
         setattr(appt, k, v)
     db.commit()
@@ -73,6 +73,6 @@ def delete_appointment(
 ) -> None:
     appt = db.get(Appointment, appointment_id)
     if appt is None or appt.user_id != user.id:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Запись не найдена")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Жазба табылмады")
     db.delete(appt)
     db.commit()

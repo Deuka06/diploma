@@ -35,7 +35,7 @@ router = APIRouter(prefix="/auth", tags=["auth"])
 def register(body: RegisterIn, db: Session = Depends(get_db)) -> TokenOut:
     exists = db.query(User).filter(User.email == body.email.lower()).first()
     if exists:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Email уже зарегистрирован")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Бұл email тіркелген")
     user = User(
         email=body.email.lower(),
         hashed_password=hash_password(body.password),
@@ -51,7 +51,7 @@ def register(body: RegisterIn, db: Session = Depends(get_db)) -> TokenOut:
 def login(body: LoginIn, db: Session = Depends(get_db)) -> TokenOut:
     user = db.query(User).filter(User.email == body.email.lower()).first()
     if user is None or not verify_password(body.password, user.hashed_password):
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Неверная почта или пароль")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Электрондық пошта немесе құпия сөз қате")
     return TokenOut(access_token=create_access_token(user.id))
 
 
@@ -69,7 +69,7 @@ def forgot_password(body: ForgotPasswordIn, db: Session = Depends(get_db)) -> Fo
         db.commit()
 
     demo = code if settings.debug_demo_otp and user else None
-    msg = "Если аккаунт существует, код отправлен (в MVP см. demo_code в ответе)."
+    msg = "Аккаунт болса, код жіберілді (MVP-де demo_code жауабын қараңыз)."
     return ForgotPasswordOut(message=msg, demo_code=demo)
 
 
@@ -87,7 +87,7 @@ def verify_otp(body: VerifyOtpIn, db: Session = Depends(get_db)) -> VerifyOtpOut
         .first()
     )
     if row is None or row.expires_at < datetime.now(timezone.utc):
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Неверный или просроченный код")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Код қате немесе мерзімі өткен")
     row.used = True
     db.commit()
     return VerifyOtpOut(reset_token=create_password_reset_token(email))
@@ -100,10 +100,10 @@ def reset_password(body: ResetPasswordIn, db: Session = Depends(get_db)) -> dict
         verify_token_type(payload, "pwdreset")
         email = str(payload["sub"]).lower()
     except Exception:
-        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Недействительный токен сброса")
+        raise HTTPException(status.HTTP_400_BAD_REQUEST, "Жарамсыз қалпына келтіру токені")
     user = db.query(User).filter(User.email == email).first()
     if user is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Пользователь не найден")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Пайдаланушы табылмады")
     user.hashed_password = hash_password(body.new_password)
     db.commit()
-    return {"message": "Пароль обновлён"}
+    return {"message": "Құпия сөз жаңартылды"}

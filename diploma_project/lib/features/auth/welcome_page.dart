@@ -18,7 +18,7 @@ class WelcomePage extends StatelessWidget {
             children: [
               const SizedBox(height: 24),
               Text(
-                'Давайте начнём',
+                'Бастайық',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       color: MediColors.primary,
@@ -27,7 +27,7 @@ class WelcomePage extends StatelessWidget {
               ),
               const SizedBox(height: 8),
               Text(
-                'Регистрируйтесь, чтобы открыть новые функции',
+                'Жаңа мүмкіндіктерді ашу үшін тіркеліңіз',
                 textAlign: TextAlign.center,
                 style: Theme.of(context).textTheme.bodyMedium?.copyWith(color: MediColors.textMuted),
               ),
@@ -40,16 +40,16 @@ class WelcomePage extends StatelessWidget {
               const SizedBox(height: 32),
               ElevatedButton(
                 onPressed: () => context.push('/register'),
-                child: const Text('Продолжить с почтой'),
+                child: const Text('Электрондық поштамен жалғастыру'),
               ),
               const SizedBox(height: 16),
               Row(
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
-                  const Text('Уже есть аккаунт? '),
+                  const Text('Аккаунтыңыз бар ма? '),
                   TextButton(
                     onPressed: () => context.push('/login'),
-                    child: const Text('Войти'),
+                    child: const Text('Кіру'),
                   ),
                 ],
               ),

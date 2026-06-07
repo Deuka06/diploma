@@ -15,16 +15,16 @@ def get_current_user(
     db: Session = Depends(get_db),
 ) -> User:
     if creds is None or creds.scheme.lower() != "bearer":
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Требуется авторизация")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Авторизация қажет")
     try:
         payload = decode_token(creds.credentials)
         verify_token_type(payload, "access")
         uid = int(payload["sub"])
     except (JWTError, KeyError, ValueError):
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Недействительный токен")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Жарамсыз токен")
     user = db.get(User, uid)
     if user is None:
-        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Пользователь не найден")
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Пайдаланушы табылмады")
     return user
 
 

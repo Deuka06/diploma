@@ -28,7 +28,7 @@ class _OnboardingFlowPageState extends State<OnboardingFlowPage> {
   bool _saving = false;
 
   static const _subtitle =
-      'Это информация нужна чтобы улучшить применение приложения';
+      'Бұл ақпарат қолданбаны жақсарту үшін қажет';
 
   @override
   void dispose() {
@@ -190,7 +190,7 @@ class _OnboardingFooter extends StatelessWidget {
           Expanded(
             child: isLast
                 ? Text(
-                    'Поздравляем',
+                    'Құттықтаймыз',
                     style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.95),
                       fontWeight: FontWeight.w700,
@@ -200,7 +200,7 @@ class _OnboardingFooter extends StatelessWidget {
                 : TextButton(
                     onPressed: saving ? null : onSkip,
                     child: Text(
-                      'Сделать потом',
+                      'Кейінірек',
                       style: TextStyle(
                         color: Colors.white.withValues(alpha: 0.92),
                         fontWeight: FontWeight.w600,
@@ -227,7 +227,7 @@ class _OnboardingFooter extends StatelessWidget {
                     height: 22,
                     child: CircularProgressIndicator(strokeWidth: 2, color: MediColors.accentPurple),
                   )
-                : Text(isLast ? 'Закончить' : 'Продолжить'),
+                : Text(isLast ? 'Аяқтау' : 'Жалғастыру'),
           ),
         ],
       ),
@@ -254,7 +254,7 @@ class _GenderStep extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Какой ваш пол?',
+            'Жынысыңыз?',
             style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w800,
@@ -266,7 +266,7 @@ class _GenderStep extends StatelessWidget {
           Text(subtitle, style: TextStyle(fontSize: 14, height: 1.4, color: MediColors.textMuted)),
           const SizedBox(height: 28),
           _GenderCard(
-            label: 'Мужчина',
+            label: 'Ер адам',
             icon: Icons.male_rounded,
             selected: selected == 'male',
             onTap: () => onSelect('male'),
@@ -274,7 +274,7 @@ class _GenderStep extends StatelessWidget {
           ),
           const SizedBox(height: 12),
           _GenderCard(
-            label: 'Женщина',
+            label: 'Әйел адам',
             icon: Icons.female_rounded,
             selected: selected == 'female',
             onTap: () => onSelect('female'),
@@ -389,7 +389,7 @@ class _AgeStepState extends State<_AgeStep> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Сколько вам лет?',
+            'Жасыңыз қанша?',
             style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w800,
@@ -475,7 +475,7 @@ class _WeightStep extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Какой ваш вес?',
+            'Салмағыңыз қандай?',
             style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w800,
@@ -557,7 +557,7 @@ class _HeightStep extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Какой ваш рост?',
+            'Бойыңыз қандай?',
             style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w800,
@@ -699,12 +699,12 @@ class _AllergyStep extends StatelessWidget {
   final ValueChanged<String> onToggle;
 
   static const _tiles = [
-    _AllergyTileData('food', 'Пищевая аллергия', Icons.water_drop_outlined),
-    _AllergyTileData('rhinitis', 'Аллергический ринит', Icons.air_rounded),
-    _AllergyTileData('dermatitis', 'Аллергический дерматит', Icons.spa_outlined),
-    _AllergyTileData('insect', 'Аллергия на насекомых', Icons.bug_report_outlined),
-    _AllergyTileData('drug', 'Лекарственная аллергия', Icons.medication_outlined),
-    _AllergyTileData('animal', 'Аллергия на животных', Icons.pets_outlined),
+    _AllergyTileData('food', 'Тағам аллергиясы', Icons.water_drop_outlined),
+    _AllergyTileData('rhinitis', 'Аллергиялық ринит', Icons.air_rounded),
+    _AllergyTileData('dermatitis', 'Аллергиялық дерматит', Icons.spa_outlined),
+    _AllergyTileData('insect', 'Жәндіктерге аллергия', Icons.bug_report_outlined),
+    _AllergyTileData('drug', 'Дәрілік аллергия', Icons.medication_outlined),
+    _AllergyTileData('animal', 'Жануарларға аллергия', Icons.pets_outlined),
   ];
 
   @override
@@ -715,7 +715,7 @@ class _AllergyStep extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'У вас есть аллергия?',
+            'Аллергияңыз бар ма?',
             style: TextStyle(
               fontSize: 26,
               fontWeight: FontWeight.w800,
@@ -757,8 +757,10 @@ class _AllergyStep extends StatelessWidget {
                           Text(
                             t.label,
                             textAlign: TextAlign.center,
+                            maxLines: 2,
+                            overflow: TextOverflow.ellipsis,
                             style: TextStyle(
-                              fontSize: 13,
+                              fontSize: 12,
                               fontWeight: FontWeight.w700,
                               height: 1.2,
                               color: sel ? MediColors.accentPurple : MediColors.text,
@@ -788,7 +790,7 @@ class _CongratsStep extends StatelessWidget {
       child: Column(
         children: [
           Text(
-            'Поздравляю',
+            'Құттықтаймын',
             style: TextStyle(
               fontSize: 28,
               fontWeight: FontWeight.w800,
@@ -798,7 +800,7 @@ class _CongratsStep extends StatelessWidget {
           ),
           const SizedBox(height: 10),
           Text(
-            'Вы только что закончили настройку',
+            'Сіз баптауды жаңа ғана аяқтадыңыз',
             textAlign: TextAlign.center,
             style: TextStyle(fontSize: 15, height: 1.4, color: MediColors.textMuted),
           ),

@@ -97,7 +97,7 @@ class _OverviewPageState extends State<OverviewPage> {
     } on DioException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message ?? 'Ошибка обновления')),
+          SnackBar(content: Text(e.message ?? 'Жаңарту қатесі')),
         );
       }
     }
@@ -138,13 +138,13 @@ class _OverviewPageState extends State<OverviewPage> {
       await _load();
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Лечение добавлено')),
+          const SnackBar(content: Text('Ем-дом қосылды')),
         );
       }
     } on DioException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message ?? 'Ошибка')),
+          SnackBar(content: Text(e.message ?? 'Қате')),
         );
       }
     }
@@ -172,7 +172,7 @@ class _OverviewPageState extends State<OverviewPage> {
               const Padding(
                 padding: EdgeInsets.fromLTRB(20, 20, 20, 8),
                 child: Text(
-                  'Ваш прогресс за последний месяц',
+                  'Соңғы айдағы прогресіңіз',
                   style: TextStyle(
                     fontSize: 25,
                     fontWeight: FontWeight.w800,
@@ -194,7 +194,7 @@ class _OverviewPageState extends State<OverviewPage> {
                   padding: EdgeInsets.fromLTRB(20, 60, 20, 0),
                   child: Center(
                     child: Text(
-                      'Нет записей о лечении.\nНажмите + чтобы добавить.',
+                      'Ем-дом жазбалары жоқ.\nҚосу үшін + басыңыз.',
                       textAlign: TextAlign.center,
                       style: TextStyle(color: MediColors.textMuted, fontSize: 15),
                     ),
@@ -216,9 +216,9 @@ class _OverviewPageState extends State<OverviewPage> {
                         child: _OverviewProgressCard(
                           title: t['disease_name'] as String? ?? '',
                           subtext: isCompleted
-                              ? 'Вы успешно завершили'
-                              : 'Нажмите для отчёта',
-                          dates: 'Начало $startDate - Конец $endDate',
+                              ? 'Сіз сәтті аяқтадыңыз'
+                              : 'Есеп үшін басыңыз',
+                          dates: '$startDate – $endDate',
                           progress: progress,
                           ringStroke: isCompleted ? 8 : 5,
                           trackAlpha: isCompleted ? 0.45 : 0.28,
@@ -476,13 +476,13 @@ class _DailyCheckInSheetState extends State<_DailyCheckInSheet> {
               ),
               const SizedBox(height: 4),
               Text(
-                'Ежедневный отчёт',
+                'Күнделікті есеп',
                 style: TextStyle(fontSize: 14, color: MediColors.textMuted),
               ),
               const SizedBox(height: 20),
               _CheckItem(
                 icon: Icons.medication_rounded,
-                label: 'Принял(а) лекарства',
+                label: 'Дәрі қабылдадым',
                 color: MediColors.accentPurple,
                 value: _tookMedicine,
                 onChanged: (v) => setState(() {
@@ -493,7 +493,7 @@ class _DailyCheckInSheetState extends State<_DailyCheckInSheet> {
               const SizedBox(height: 10),
               _CheckItem(
                 icon: Icons.sentiment_satisfied_rounded,
-                label: 'Чувствую себя хорошо',
+                label: 'Өзімді жақсы сезінемін',
                 color: const Color(0xFF3AB85A),
                 value: _feelingGood,
                 onChanged: (v) => setState(() {
@@ -504,7 +504,7 @@ class _DailyCheckInSheetState extends State<_DailyCheckInSheet> {
               const SizedBox(height: 10),
               _CheckItem(
                 icon: Icons.sentiment_very_dissatisfied_rounded,
-                label: 'Ухудшение самочувствия',
+                label: 'Жағдайым нашарлады',
                 color: const Color(0xFFFF5E6B),
                 value: _worsening,
                 onChanged: (v) => setState(() {
@@ -531,7 +531,7 @@ class _DailyCheckInSheetState extends State<_DailyCheckInSheet> {
                     textStyle: const TextStyle(
                         fontSize: 17, fontWeight: FontWeight.w800),
                   ),
-                  child: const Text('Сохранить'),
+                  child: const Text('Сақтау'),
                 ),
               ),
             ],
@@ -685,7 +685,7 @@ class _AddTreatmentSheetState extends State<_AddTreatmentSheet> {
                           ),
                         ),
                         const Text(
-                          'Добавить',
+                          'Қосу',
                           style: TextStyle(
                               fontSize: 24,
                               fontWeight: FontWeight.w800,
@@ -694,18 +694,18 @@ class _AddTreatmentSheetState extends State<_AddTreatmentSheet> {
                         const SizedBox(height: 20),
                         _SheetField(
                             controller: _disease,
-                            hint: 'Название болезни',
+                            hint: 'Ауру атауы',
                             fillColor: _fieldFill),
                         const SizedBox(height: 12),
                         _SheetField(
                             controller: _period,
-                            hint: 'На какой срок (дней)',
+                            hint: 'Мерзімі (күн)',
                             fillColor: _fieldFill,
                             keyboardType: TextInputType.number),
                         const SizedBox(height: 12),
                         _SheetField(
                             controller: _medicine,
-                            hint: 'Лекарство (необязательно)',
+                            hint: 'Дәрі (міндетті емес)',
                             fillColor: _fieldFill),
                         const SizedBox(height: 24),
                         SizedBox(
@@ -733,7 +733,7 @@ class _AddTreatmentSheetState extends State<_AddTreatmentSheet> {
                               textStyle: const TextStyle(
                                   fontSize: 17, fontWeight: FontWeight.w800),
                             ),
-                            child: const Text('Добавить'),
+                            child: const Text('Қосу'),
                           ),
                         ),
                       ],

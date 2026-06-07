@@ -16,7 +16,7 @@ String? dioErrorMessage(DioException e) {
       if (first is Map && first['msg'] is String) return first['msg'] as String;
     }
   }
-  return e.message ?? 'Ошибка сети';
+  return e.message ?? 'Желі қатесі';
 }
 
 class AuthController extends ChangeNotifier {
@@ -110,7 +110,7 @@ class AuthController extends ChangeNotifier {
         data: {'email': email, 'password': password},
       );
       final t = res.data?['access_token'] as String?;
-      if (t == null) return 'Нет токена в ответе';
+      if (t == null) return 'Жауапта токен жоқ';
       await _persist(t);
       await refreshUserProfile();
       return null;
@@ -130,7 +130,7 @@ class AuthController extends ChangeNotifier {
         },
       );
       final t = res.data?['access_token'] as String?;
-      if (t == null) return 'Нет токена в ответе';
+      if (t == null) return 'Жауапта токен жоқ';
       await _persist(t);
       await refreshUserProfile();
       return null;

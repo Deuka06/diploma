@@ -105,7 +105,7 @@ GoRouter createAppRouter(AuthController auth) {
         builder: (c, s) {
           final extra = s.extra;
           if (extra is! CheckoutSelection) {
-            return const Scaffold(body: Center(child: Text('Некорректный переход')));
+            return const Scaffold(body: Center(child: Text('Қате өту')));
           }
           return CheckoutDeliveryPage(selection: extra);
         },
@@ -116,7 +116,7 @@ GoRouter createAppRouter(AuthController auth) {
         builder: (c, s) {
           final extra = s.extra;
           if (extra is! CheckoutSelection) {
-            return const Scaffold(body: Center(child: Text('Некорректный переход')));
+            return const Scaffold(body: Center(child: Text('Қате өту')));
           }
           return CheckoutPaymentPage(selection: extra);
         },

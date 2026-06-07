@@ -55,19 +55,19 @@ class _RegisterPageState extends State<RegisterPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Создайте аккаунт',
+                'Аккаунт жасаңыз',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       color: MediColors.primary,
                       fontWeight: FontWeight.w700,
                     ),
               ),
               const SizedBox(height: 8),
-              const Text('Заполните поля ниже', style: TextStyle(color: MediColors.textMuted)),
+              const Text('Төмендегі өрістерді толтырыңыз', style: TextStyle(color: MediColors.textMuted)),
               const SizedBox(height: 24),
               TextField(
                 controller: _name,
                 decoration: const InputDecoration(
-                  labelText: 'Ваше полное имя',
+                  labelText: 'Толық атыңыз',
                   prefixIcon: Icon(Icons.person_outline),
                 ),
               ),
@@ -76,7 +76,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(
-                  labelText: 'Почта',
+                  labelText: 'Электрондық пошта',
                   prefixIcon: Icon(Icons.mail_outline),
                 ),
               ),
@@ -85,7 +85,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 controller: _pass,
                 obscureText: _hide,
                 decoration: InputDecoration(
-                  labelText: 'Пароль',
+                  labelText: 'Құпия сөз',
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     onPressed: () => setState(() => _hide = !_hide),
@@ -102,7 +102,7 @@ class _RegisterPageState extends State<RegisterPage> {
                 onPressed: _loading ? null : _submit,
                 child: _loading
                     ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2))
-                    : const Text('Регистрация'),
+                    : const Text('Тіркелу'),
               ),
             ],
           ),

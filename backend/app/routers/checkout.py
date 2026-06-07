@@ -16,7 +16,7 @@ def list_offers_for_medicine(
     db: Session = Depends(get_db),
 ) -> list[SellerOffer]:
     if db.get(Medicine, medicine_id) is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Препарат не найден")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Дәрі табылмады")
     q = db.query(SellerOffer).filter(SellerOffer.medicine_id == medicine_id)
     rows = q.all()
     if tag:

@@ -98,7 +98,7 @@ def update_treatment_progress(
 ) -> TreatmentOut:
     t = db.get(Treatment, treatment_id)
     if t is None or t.user_id != user.id:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Лечение не найдено")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Ем-дом табылмады")
     t.manual_progress = round(min(max(body.progress, 0.0), 1.0), 4)
     db.commit()
     db.refresh(t)
@@ -113,6 +113,6 @@ def delete_treatment(
 ) -> None:
     t = db.get(Treatment, treatment_id)
     if t is None or t.user_id != user.id:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Лечение не найдено")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Ем-дом табылмады")
     db.delete(t)
     db.commit()

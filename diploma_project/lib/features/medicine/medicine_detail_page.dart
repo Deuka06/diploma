@@ -72,7 +72,7 @@ class _MedicineDetailPageState extends State<MedicineDetailPage> {
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
               _BackRow(onBack: () => context.pop()),
-              const Expanded(child: Center(child: Text('Не найдено'))),
+              const Expanded(child: Center(child: Text('Табылмады'))),
             ],
           ),
         ),
@@ -133,7 +133,7 @@ class _MedicineDetailPageState extends State<MedicineDetailPage> {
                         const SizedBox(height: 20),
                         if (showSafety) ...[
                           Text(
-                            rec ? 'Рекомендуется к применению' : 'Не рекомендуется к применению',
+                            rec ? 'Қолдануға ұсынылады' : 'Қолдануға ұсынылмайды',
                             style: TextStyle(
                               fontSize: 15,
                               fontWeight: FontWeight.w700,
@@ -153,10 +153,10 @@ class _MedicineDetailPageState extends State<MedicineDetailPage> {
                         ],
                         _DetailRow(
                           icon: Icons.calendar_today_outlined,
-                          title: dosage.isNotEmpty ? 'Приём: $dosage' : 'Приём: по назначению врача',
+                          title: dosage.isNotEmpty ? 'Қабылдау: $dosage' : 'Қабылдау: дәрігер тағайындауы бойынша',
                           subtitle: instructions.isNotEmpty
                               ? instructions
-                              : 'Следуйте инструкции и рекомендациям специалиста.',
+                              : 'Нұсқаулық пен маман ұсыныстарын орындаңыз.',
                         ),
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 16),
@@ -164,10 +164,10 @@ class _MedicineDetailPageState extends State<MedicineDetailPage> {
                         ),
                         _DetailRow(
                           icon: Icons.water_drop_outlined,
-                          title: 'Нужно принимать с водой',
+                          title: 'Сумен қабылдау керек',
                           subtitle: restrictions.isNotEmpty
                               ? restrictions
-                              : 'Запивайте водой; не сочетайте с газировкой и алкоголем без совета врача.',
+                              : 'Сумен ішіңіз; дәрігер кеңесінсіз газды су мен алкогольмен қосуға болмайды.',
                         ),
                         const Padding(
                           padding: EdgeInsets.symmetric(vertical: 16),
@@ -175,16 +175,16 @@ class _MedicineDetailPageState extends State<MedicineDetailPage> {
                         ),
                         _DetailRow(
                           icon: Icons.medication_liquid_outlined,
-                          title: 'Описание',
+                          title: 'Сипаттама',
                           subtitle: description.isNotEmpty
                               ? description
-                              : 'Подробное описание уточняйте в официальной инструкции к препарату.',
+                              : 'Толық сипаттаманы дәрінің ресми нұсқаулығынан қараңыз.',
                           subtitleIsBody: true,
                         ),
                         if (_safety != null && (_safety!['alternatives'] as List?)?.isNotEmpty == true) ...[
                           const SizedBox(height: 28),
                           const Text(
-                            'Безопасные аналоги',
+                            'Қауіпсіз баламалар',
                             style: TextStyle(
                               fontSize: 16,
                               fontWeight: FontWeight.w800,
@@ -274,7 +274,7 @@ class _MedicineDetailPageState extends State<MedicineDetailPage> {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
                   ),
-                  child: const Text('Купить'),
+                  child: const Text('Сатып алу'),
                 ),
               ),
             ),
@@ -296,7 +296,7 @@ class _BackRow extends StatelessWidget {
       onPressed: onBack,
       icon: const Icon(Icons.arrow_back_ios_new_rounded, size: 18, color: Color(0xFF000000)),
       label: const Text(
-        'Назад',
+        'Артқа',
         style: TextStyle(
           fontSize: 16,
           fontWeight: FontWeight.w700,

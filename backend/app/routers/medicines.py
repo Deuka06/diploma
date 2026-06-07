@@ -12,12 +12,12 @@ from app.services.allergy import build_safety_payload
 router = APIRouter(prefix="/medicines", tags=["medicines"])
 
 CATEGORIES: list[CategoryOut] = [
-    CategoryOut(id="heart", label="Сердце"),
-    CategoryOut(id="teeth", label="Зубы"),
-    CategoryOut(id="head", label="Голова"),
-    CategoryOut(id="painkillers", label="Обезболивающие"),
-    CategoryOut(id="vitamins", label="Витамины"),
-    CategoryOut(id="antibiotics", label="Антибиотики"),
+    CategoryOut(id="heart", label="Жүрек"),
+    CategoryOut(id="teeth", label="Тіс"),
+    CategoryOut(id="head", label="Бас"),
+    CategoryOut(id="painkillers", label="Ауыруды басатындар"),
+    CategoryOut(id="vitamins", label="Витаминдер"),
+    CategoryOut(id="antibiotics", label="Антибиотиктер"),
 ]
 
 
@@ -29,7 +29,7 @@ def list_categories() -> list[CategoryOut]:
 @router.get("", response_model=list[MedicineBrief])
 def list_medicines(
     category: str | None = Query(default=None),
-    q: str | None = Query(default=None, description="Поиск по названию"),
+    q: str | None = Query(default=None, description="Атауы бойынша іздеу"),
     db: Session = Depends(get_db),
 ) -> list[Medicine]:
     query = db.query(Medicine)
@@ -46,7 +46,7 @@ def list_medicines(
 def get_medicine(medicine_id: str, db: Session = Depends(get_db)) -> Medicine:
     m = db.get(Medicine, medicine_id)
     if m is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Препарат не найден")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Дәрі табылмады")
     return m
 
 
@@ -58,7 +58,7 @@ def medicine_safety(
 ) -> MedicineSafetyOut:
     m = db.get(Medicine, medicine_id)
     if m is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Препарат не найден")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Дәрі табылмады")
     payload = build_safety_payload(db, m, user)
     alts = [MedicineBrief.model_validate(x) for x in payload["alternatives"]]
     return MedicineSafetyOut(
@@ -88,10 +88,10 @@ def medicine_safety_public(
     db: Session = Depends(get_db),
     user: User | None = Depends(get_current_user_optional),
 ) -> MedicineSafetyOut:
-    """Без обязательного токена: если не авторизован — считаем без аллергий."""
+    """Міндетті токенсіз: авторизацияланбаса — аллергиясыз есептейміз."""
     m = db.get(Medicine, medicine_id)
     if m is None:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Препарат не найден")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Дәрі табылмады")
     payload = build_safety_payload(db, m, user)
     alts = [MedicineBrief.model_validate(x) for x in payload["alternatives"]]
     return MedicineSafetyOut(

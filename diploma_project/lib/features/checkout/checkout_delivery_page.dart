@@ -21,7 +21,7 @@ class CheckoutDeliveryPage extends StatelessWidget {
           onPressed: () => context.pop(),
         ),
         title: const Text(
-          'Способ доставки',
+          'Жеткізу әдісі',
           style: TextStyle(fontWeight: FontWeight.w700, fontSize: 17),
         ),
         centerTitle: true,
@@ -35,7 +35,7 @@ class CheckoutDeliveryPage extends StatelessWidget {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   Text(
-                    'Заказ 1 (${selection.sellerName})',
+                    'Тапсырыс 1 (${selection.sellerName})',
                     style: const TextStyle(
                       fontSize: 17,
                       fontWeight: FontWeight.w700,
@@ -97,7 +97,7 @@ class CheckoutDeliveryPage extends StatelessWidget {
                               crossAxisAlignment: CrossAxisAlignment.start,
                               children: [
                                 const Text(
-                                  'Доставка',
+                                  'Жеткізу',
                                   style: TextStyle(
                                     fontSize: 17,
                                     fontWeight: FontWeight.w700,
@@ -140,7 +140,7 @@ class CheckoutDeliveryPage extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
                   ),
-                  child: const Text('Перейти к оплате'),
+                  child: const Text('Төлемге өту'),
                 ),
               ),
             ),

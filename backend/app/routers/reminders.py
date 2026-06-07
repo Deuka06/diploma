@@ -54,7 +54,7 @@ def update_reminder(
 ) -> ReminderOut:
     rem = db.get(Reminder, reminder_id)
     if rem is None or rem.user_id != user.id:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Напоминание не найдено")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Еске салу табылмады")
     for k, v in body.model_dump(exclude_unset=True).items():
         setattr(rem, k, v)
     db.commit()
@@ -70,6 +70,6 @@ def delete_reminder(
 ) -> None:
     rem = db.get(Reminder, reminder_id)
     if rem is None or rem.user_id != user.id:
-        raise HTTPException(status.HTTP_404_NOT_FOUND, "Напоминание не найдено")
+        raise HTTPException(status.HTTP_404_NOT_FOUND, "Еске салу табылмады")
     db.delete(rem)
     db.commit()

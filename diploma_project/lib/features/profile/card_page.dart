@@ -33,7 +33,7 @@ class _CardPageState extends State<CardPage> {
 
   void _save() {
     ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Карта сохранена')),
+      const SnackBar(content: Text('Карта сақталды')),
     );
     context.pop();
   }
@@ -63,7 +63,7 @@ class _CardPageState extends State<CardPage> {
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
                   const Text(
-                    'Добавить карту',
+                    'Карта қосу',
                     style: TextStyle(
                       fontSize: 24,
                       fontWeight: FontWeight.w800,
@@ -71,7 +71,7 @@ class _CardPageState extends State<CardPage> {
                     ),
                   ),
                   const SizedBox(height: 24),
-                  const Text('Введите номер карты',
+                  const Text('Карта нөмірін енгізіңіз',
                       style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF6B6B6B))),
                   const SizedBox(height: 8),
                   TextField(
@@ -85,7 +85,7 @@ class _CardPageState extends State<CardPage> {
                     decoration: _dec('4400 4300 3000 22 33', _fieldFill),
                   ),
                   const SizedBox(height: 16),
-                  const Text('Введите CVC',
+                  const Text('CVC енгізіңіз',
                       style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF6B6B6B))),
                   const SizedBox(height: 8),
                   TextField(
@@ -98,7 +98,7 @@ class _CardPageState extends State<CardPage> {
                     decoration: _dec('333', _fieldFill),
                   ),
                   const SizedBox(height: 16),
-                  const Text('Введите дату',
+                  const Text('Мерзімін енгізіңіз',
                       style: TextStyle(fontWeight: FontWeight.w600, fontSize: 14, color: Color(0xFF6B6B6B))),
                   const SizedBox(height: 8),
                   TextField(
@@ -124,7 +124,7 @@ class _CardPageState extends State<CardPage> {
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                         textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
                       ),
-                      child: const Text('Сохранить'),
+                      child: const Text('Сақтау'),
                     ),
                   ),
                 ],

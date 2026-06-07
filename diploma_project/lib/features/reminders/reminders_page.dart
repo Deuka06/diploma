@@ -56,7 +56,7 @@ class _RemindersPageState extends State<RemindersPage> {
     if (!granted) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Разрешите уведомления в настройках')),
+          const SnackBar(content: Text('Параметрлерде хабарландыруларға рұқсат беріңіз')),
         );
       }
       return;
@@ -71,7 +71,7 @@ class _RemindersPageState extends State<RemindersPage> {
 
         await NotificationService().scheduleReminder(
           reminderId: reminder['id'] as int,
-          medicineName: reminder['medicine_name'] as String? ?? 'Лекарство',
+          medicineName: reminder['medicine_name'] as String? ?? 'Дәрі',
           dosage: reminder['dosage'] as String?,
           hour: hour,
           minute: minute,
@@ -82,7 +82,7 @@ class _RemindersPageState extends State<RemindersPage> {
     setState(() => _notificationsEnabled = true);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Уведомления включены')),
+        const SnackBar(content: Text('Хабарландырулар қосылды')),
       );
     }
   }
@@ -92,7 +92,7 @@ class _RemindersPageState extends State<RemindersPage> {
     setState(() => _notificationsEnabled = false);
     if (mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Уведомления отключены')),
+        const SnackBar(content: Text('Хабарландырулар өшірілді')),
       );
     }
   }
@@ -113,7 +113,7 @@ class _RemindersPageState extends State<RemindersPage> {
 
         await NotificationService().scheduleReminder(
           reminderId: reminder['id'] as int,
-          medicineName: reminder['medicine_name'] as String? ?? 'Лекарство',
+          medicineName: reminder['medicine_name'] as String? ?? 'Дәрі',
           dosage: reminder['dosage'] as String?,
           hour: hour,
           minute: minute,
@@ -126,7 +126,7 @@ class _RemindersPageState extends State<RemindersPage> {
     } on DioException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message ?? 'Ошибка')),
+          SnackBar(content: Text(e.message ?? 'Қате')),
         );
       }
     }
@@ -141,7 +141,7 @@ class _RemindersPageState extends State<RemindersPage> {
     } on DioException catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(e.message ?? 'Ошибка')),
+          SnackBar(content: Text(e.message ?? 'Қате')),
         );
       }
     }
@@ -156,29 +156,29 @@ class _RemindersPageState extends State<RemindersPage> {
       context: context,
       builder: (context) => StatefulBuilder(
         builder: (context, setDialogState) => AlertDialog(
-          title: const Text('Новое напоминание'),
+          title: const Text('Жаңа еске салу'),
           content: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
                 controller: medicineCtrl,
                 decoration: const InputDecoration(
-                  labelText: 'Название лекарства',
-                  hintText: 'Например: Парацетамол',
+                  labelText: 'Дәрі атауы',
+                  hintText: 'Мысалы: Парацетамол',
                 ),
               ),
               const SizedBox(height: 12),
               TextField(
                 controller: dosageCtrl,
                 decoration: const InputDecoration(
-                  labelText: 'Дозировка',
-                  hintText: 'Например: 1 таблетка',
+                  labelText: 'Дозасы',
+                  hintText: 'Мысалы: 1 таблетка',
                 ),
               ),
               const SizedBox(height: 16),
               ListTile(
                 contentPadding: EdgeInsets.zero,
-                title: const Text('Время'),
+                title: const Text('Уақыт'),
                 trailing: TextButton(
                   onPressed: () async {
                     final time = await showTimePicker(
@@ -200,11 +200,11 @@ class _RemindersPageState extends State<RemindersPage> {
           actions: [
             TextButton(
               onPressed: () => Navigator.pop(context, false),
-              child: const Text('Отмена'),
+              child: const Text('Болдырмау'),
             ),
             FilledButton(
               onPressed: () => Navigator.pop(context, true),
-              child: const Text('Добавить'),
+              child: const Text('Қосу'),
             ),
           ],
         ),
@@ -232,7 +232,7 @@ class _RemindersPageState extends State<RemindersPage> {
       } on DioException catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(e.message ?? 'Ошибка')),
+            SnackBar(content: Text(e.message ?? 'Қате')),
           );
         }
       }
@@ -253,7 +253,7 @@ class _RemindersPageState extends State<RemindersPage> {
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FB),
       appBar: AppBar(
-        title: const Text('Напоминания'),
+        title: const Text('Еске салулар'),
         backgroundColor: Colors.white,
         foregroundColor: Colors.black,
         elevation: 0,
@@ -264,7 +264,7 @@ class _RemindersPageState extends State<RemindersPage> {
               _notificationsEnabled ? Icons.notifications_active : Icons.notifications_off_outlined,
               color: _notificationsEnabled ? MediColors.accentPurple : Colors.grey,
             ),
-            tooltip: _notificationsEnabled ? 'Отключить уведомления' : 'Включить уведомления',
+            tooltip: _notificationsEnabled ? 'Хабарландыруларды өшіру' : 'Хабарландыруларды қосу',
           ),
         ],
       ),
@@ -278,12 +278,12 @@ class _RemindersPageState extends State<RemindersPage> {
                       Icon(Icons.alarm_off, size: 64, color: Colors.grey.shade400),
                       const SizedBox(height: 16),
                       Text(
-                        'Нет напоминаний',
+                        'Еске салулар жоқ',
                         style: TextStyle(fontSize: 18, color: Colors.grey.shade600),
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        'Добавьте напоминание о приёме лекарства',
+                        'Дәрі қабылдау туралы еске салу қосыңыз',
                         style: TextStyle(fontSize: 14, color: Colors.grey.shade500),
                       ),
                     ],
@@ -320,7 +320,7 @@ class _RemindersPageState extends State<RemindersPage> {
                             ),
                           ),
                           title: Text(
-                            reminder['medicine_name'] as String? ?? 'Лекарство',
+                            reminder['medicine_name'] as String? ?? 'Дәрі',
                             style: TextStyle(
                               fontWeight: FontWeight.w600,
                               color: isActive ? Colors.black : Colors.grey,

@@ -28,13 +28,13 @@ class MediShell extends StatelessWidget {
               _NavItem(
                 selected: navigationShell.currentIndex == 0,
                 icon: Icons.home_rounded,
-                label: 'Главная',
+                label: 'Басты бет',
                 onTap: () => _onTap(0),
               ),
               _NavItem(
                 selected: navigationShell.currentIndex == 1,
                 icon: Icons.medication_rounded,
-                label: 'Лекарство',
+                label: 'Дәрілер',
                 onTap: () => _onTap(1),
               ),
               _NavItem(
@@ -46,7 +46,7 @@ class MediShell extends StatelessWidget {
               _NavItem(
                 selected: navigationShell.currentIndex == 3,
                 icon: Icons.insights_rounded,
-                label: 'Обзор',
+                label: 'Шолу',
                 onTap: () => _onTap(3),
               ),
               _NavItem(

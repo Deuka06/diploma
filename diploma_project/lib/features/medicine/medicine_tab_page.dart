@@ -83,7 +83,7 @@ class _MedicineTabPageState extends State<MedicineTabPage> {
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
                       const Text(
-                        'Давайте найдем лекарство',
+                        'Дәрі табайық',
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
@@ -99,7 +99,7 @@ class _MedicineTabPageState extends State<MedicineTabPage> {
                       ),
                       const SizedBox(height: 22),
                       Text(
-                        'Категорий',
+                        'Санаттар',
                         style: TextStyle(
                           fontSize: 15,
                           fontWeight: FontWeight.w800,
@@ -142,7 +142,7 @@ class _MedicineTabPageState extends State<MedicineTabPage> {
                 child: _CovidBanner(
                   onLearnMore: () {
                     ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Материалы о профилактике — в разделе помощи')),
+                      const SnackBar(content: Text('Профилактика туралы — көмек бөлімінде')),
                     );
                   },
                 ),
@@ -152,7 +152,7 @@ class _MedicineTabPageState extends State<MedicineTabPage> {
               child: Padding(
                 padding: const EdgeInsets.fromLTRB(20, 24, 20, 12),
                 child: Text(
-                  'Лекарство для вас',
+                  'Сізге арналған дәрі',
                   style: TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.w800,
@@ -235,7 +235,7 @@ class _SearchPill extends StatelessWidget {
             cursorColor: MediColors.greetingPurple,
             style: const TextStyle(fontSize: 16, color: MediColors.text),
             decoration: InputDecoration(
-              hintText: 'Искать',
+              hintText: 'Іздеу',
               hintStyle: TextStyle(
                 color: MediColors.textMuted.withValues(alpha: 0.85),
                 fontSize: 16,
@@ -326,8 +326,10 @@ class _CategoryCard extends StatelessWidget {
             Text(
               label,
               textAlign: TextAlign.center,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
               style: TextStyle(
-                fontSize: 14,
+                fontSize: 13,
                 fontWeight: FontWeight.w800,
                 color: accent,
                 height: 1.1,
@@ -401,11 +403,13 @@ class _CovidBanner extends StatelessWidget {
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   const Text(
-                    'Как защитить свою жизнь от COVID-19',
+                    'COVID-19-дан өзіңізді қалай қорғауға болады',
+                    maxLines: 3,
+                    overflow: TextOverflow.ellipsis,
                     style: TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w800,
-                      fontSize: 18,
+                      fontSize: 15,
                       height: 1.25,
                     ),
                   ),
@@ -419,7 +423,7 @@ class _CovidBanner extends StatelessWidget {
                       child: const Padding(
                         padding: EdgeInsets.symmetric(horizontal: 22, vertical: 12),
                         child: Text(
-                          'Узнать больше',
+                          'Толығырақ білу',
                           style: TextStyle(
                             color: Colors.white,
                             fontWeight: FontWeight.w700,
@@ -472,7 +476,7 @@ class _ProductCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final title = name.isNotEmpty ? name : 'Лекарство';
+    final title = name.isNotEmpty ? name : 'Дәрі';
     return GestureDetector(
       onTap: onTap,
       child: Container(

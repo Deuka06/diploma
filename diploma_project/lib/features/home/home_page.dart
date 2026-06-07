@@ -64,18 +64,8 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
       _cardColors[colorIndex.clamp(0, _cardColors.length - 1)];
 
   String _formatDays(int days) {
-    if (days <= 0) return 'Продолжается';
-    if (days % 100 >= 11 && days % 100 <= 19) return '$days дней';
-    switch (days % 10) {
-      case 1:
-        return '$days день';
-      case 2:
-      case 3:
-      case 4:
-        return '$days дня';
-      default:
-        return '$days дней';
-    }
+    if (days <= 0) return 'Жалғасуда';
+    return '$days күн';
   }
 
   @override
@@ -119,7 +109,7 @@ class _HomePageState extends State<HomePage> with SingleTickerProviderStateMixin
                   ),
                   const SizedBox(height: 12),
                   Text(
-                    userName.isNotEmpty ? 'Привет, $userName!' : 'Привет!',
+                    userName.isNotEmpty ? 'Сәлем, $userName!' : 'Сәлем!',
                     style: Theme.of(context).textTheme.headlineSmall?.copyWith(
                           color: MediColors.greetingPurple,
                           fontWeight: FontWeight.w800,
@@ -189,7 +179,7 @@ class _HomeHeaderChips extends StatelessWidget {
           _HomeActiveTabPill(
             onTap: () => onChanged(0),
             icon: _PrescriptionIcon(color: _purple, ringColor: MediColors.tabActiveLavender),
-            label: 'Ваш рецепт',
+            label: 'Сіздің рецептіңіз',
           )
         else
           _HomeIconOnlyTab(
@@ -289,7 +279,7 @@ class _HomeSectionHeader extends StatelessWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            isRecipes ? 'Твои лекарства' : 'Твой прогресс',
+            isRecipes ? 'Сіздің дәрілеріңіз' : 'Сіздің прогресіңіз',
             style: Theme.of(context).textTheme.titleLarge?.copyWith(
                   color: MediColors.greetingPurple,
                   fontWeight: FontWeight.w800,
@@ -299,7 +289,7 @@ class _HomeSectionHeader extends StatelessWidget {
           ),
           const SizedBox(height: 4),
           Text(
-            isRecipes ? 'Написаны вашим Доктором' : 'В этой неделе',
+            isRecipes ? 'Дәрігер тағайындаған' : 'Осы аптада',
             style: const TextStyle(
               color: MediColors.headerSubtitle,
               fontSize: 14,
@@ -382,7 +372,7 @@ class _RecipesTab extends StatelessWidget {
             SizedBox(height: 60),
             Center(
               child: Text(
-                'Нет активных лечений.\nДобавьте в разделе Обзор.',
+                'Белсенді ем-дом жоқ.\nШолу бөліміне қосыңыз.',
                 textAlign: TextAlign.center,
                 style: TextStyle(color: MediColors.textMuted, fontSize: 15),
               ),
@@ -480,7 +470,7 @@ class _ProgressTab extends StatelessWidget {
                       Text(
                         active.isNotEmpty
                             ? active.first['disease_name'] as String
-                            : 'Нет активных',
+                            : 'Белсенді жоқ',
                         style: const TextStyle(
                           color: Colors.white,
                           fontSize: 20,
@@ -489,7 +479,7 @@ class _ProgressTab extends StatelessWidget {
                       ),
                       const SizedBox(height: 6),
                       Text(
-                        'Ваш еженедельный отчет',
+                        'Апталық есебіңіз',
                         style: TextStyle(
                           color: Colors.white.withValues(alpha: 0.88),
                           fontSize: 13,
@@ -555,7 +545,7 @@ class _ProgressTab extends StatelessWidget {
                           color: const Color(0xFF5BA4E5),
                           icon: Icons.water_drop_rounded,
                           value: '${stats.water}',
-                          label: 'Стаканов / ${DailyStatsController.waterTarget}',
+                          label: 'Стақан / ${DailyStatsController.waterTarget}',
                           progress: stats.water / DailyStatsController.waterTarget,
                           onTap: () => _showWaterSheet(context, stats),
                         ),
@@ -566,7 +556,7 @@ class _ProgressTab extends StatelessWidget {
                           color: const Color(0xFFFF9A9A),
                           icon: Icons.directions_walk_rounded,
                           value: _formatNum(stats.steps),
-                          label: 'Шаги / ${_formatNum(DailyStatsController.stepsTarget)}',
+                          label: 'Қадам / ${_formatNum(DailyStatsController.stepsTarget)}',
                           progress: stats.steps / DailyStatsController.stepsTarget,
                           onTap: () => _showStepsSheet(context, stats),
                         ),
@@ -636,8 +626,8 @@ class _WaterSheet extends StatelessWidget {
         builder: (context, s, _) {
           final pct = (s.water / DailyStatsController.waterTarget).clamp(0.0, 1.0);
           return _BottomSheetShell(
-            title: 'Вода',
-            subtitle: 'Цель: ${DailyStatsController.waterTarget} стаканов в день (≈ 2 л)',
+            title: 'Су',
+            subtitle: 'Мақсат: күніне ${DailyStatsController.waterTarget} стақан (≈ 2 л)',
             child: Column(
               children: [
                 const SizedBox(height: 8),
@@ -645,7 +635,7 @@ class _WaterSheet extends StatelessWidget {
                   '${s.water} / ${DailyStatsController.waterTarget}',
                   style: const TextStyle(fontSize: 42, fontWeight: FontWeight.w900, color: Color(0xFF5BA4E5)),
                 ),
-                const Text('стаканов', style: TextStyle(fontSize: 15, color: Color(0xFF8E8E93))),
+                const Text('стақан', style: TextStyle(fontSize: 15, color: Color(0xFF8E8E93))),
                 const SizedBox(height: 20),
                 ClipRRect(
                   borderRadius: BorderRadius.circular(8),
@@ -676,7 +666,7 @@ class _WaterSheet extends StatelessWidget {
                   ],
                 ),
                 const SizedBox(height: 8),
-                const Text('1 стакан = 250 мл', style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93))),
+                const Text('1 стақан = 250 мл', style: TextStyle(fontSize: 13, color: Color(0xFF8E8E93))),
               ],
             ),
           );
@@ -716,8 +706,8 @@ class _CaloriesSheetState extends State<_CaloriesSheet> {
       builder: (context, stats, _) {
         final pct = (stats.calories / DailyStatsController.caloriesTarget).clamp(0.0, 1.0);
         return _BottomSheetShell(
-          title: 'Калории',
-          subtitle: 'Цель: ${DailyStatsController.caloriesTarget} ккал в день',
+          title: 'Калория',
+          subtitle: 'Мақсат: күніне ${DailyStatsController.caloriesTarget} ккал',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -740,7 +730,7 @@ class _CaloriesSheetState extends State<_CaloriesSheet> {
                 ),
               ),
               const SizedBox(height: 24),
-              const Text('Добавить приём пищи', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
+              const Text('Тамақ мезгілін қосу', style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
               const SizedBox(height: 10),
               Row(
                 children: [
@@ -750,7 +740,7 @@ class _CaloriesSheetState extends State<_CaloriesSheet> {
                       keyboardType: TextInputType.number,
                       inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                       decoration: InputDecoration(
-                        hintText: 'Введите ккал',
+                        hintText: 'Ккал енгізіңіз',
                         filled: true,
                         fillColor: const Color(0xFFF2F2F7),
                         border: OutlineInputBorder(
@@ -769,14 +759,14 @@ class _CaloriesSheetState extends State<_CaloriesSheet> {
                       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
                     ),
-                    child: const Text('Добавить', style: TextStyle(fontWeight: FontWeight.w700)),
+                    child: const Text('Қосу', style: TextStyle(fontWeight: FontWeight.w700)),
                   ),
                 ],
               ),
               const SizedBox(height: 12),
               TextButton(
                 onPressed: stats.resetCalories,
-                child: const Text('Сбросить за день', style: TextStyle(color: Color(0xFFFF3B30))),
+                child: const Text('Күнді нөлдеу', style: TextStyle(color: Color(0xFFFF3B30))),
               ),
             ],
           ),
@@ -824,8 +814,8 @@ class _StepsSheetState extends State<_StepsSheet> {
       builder: (context, stats, _) {
         final pct = (stats.steps / DailyStatsController.stepsTarget).clamp(0.0, 1.0);
         return _BottomSheetShell(
-          title: 'Шаги',
-          subtitle: 'Цель: ${_formatNum(DailyStatsController.stepsTarget)} шагов в день',
+          title: 'Қадамдар',
+          subtitle: 'Мақсат: күніне ${_formatNum(DailyStatsController.stepsTarget)} қадам',
           child: Column(
             crossAxisAlignment: CrossAxisAlignment.start,
             children: [
@@ -836,7 +826,7 @@ class _StepsSheetState extends State<_StepsSheet> {
                   style: const TextStyle(fontSize: 42, fontWeight: FontWeight.w900, color: Color(0xFFFF9A9A)),
                 ),
               ),
-              const Center(child: Text('шагов', style: TextStyle(fontSize: 15, color: Color(0xFF8E8E93)))),
+              const Center(child: Text('қадам', style: TextStyle(fontSize: 15, color: Color(0xFF8E8E93)))),
               const SizedBox(height: 16),
               ClipRRect(
                 borderRadius: BorderRadius.circular(8),
@@ -872,8 +862,8 @@ class _StepsSheetState extends State<_StepsSheet> {
                     Expanded(
                       child: Text(
                         stats.pedometerActive
-                            ? 'Шагомер активен — шаги считаются автоматически'
-                            : 'Шагомер недоступен — введите шаги вручную',
+                            ? 'Қадамсан белсенді — қадамдар автоматты есептеледі'
+                            : 'Қадамсан қолжетімсіз — қадамды қолмен енгізіңіз',
                         style: TextStyle(
                           fontSize: 13,
                           fontWeight: FontWeight.w600,
@@ -888,7 +878,7 @@ class _StepsSheetState extends State<_StepsSheet> {
               ),
               if (!stats.pedometerActive) ...[
                 const SizedBox(height: 16),
-                const Text('Введите количество шагов',
+                const Text('Қадам санын енгізіңіз',
                     style: TextStyle(fontWeight: FontWeight.w700, fontSize: 15)),
                 const SizedBox(height: 10),
                 Row(
@@ -899,7 +889,7 @@ class _StepsSheetState extends State<_StepsSheet> {
                         keyboardType: TextInputType.number,
                         inputFormatters: [FilteringTextInputFormatter.digitsOnly],
                         decoration: InputDecoration(
-                          hintText: 'Например: 5000',
+                          hintText: 'Мысалы: 5000',
                           filled: true,
                           fillColor: const Color(0xFFF2F2F7),
                           border: OutlineInputBorder(
@@ -920,7 +910,7 @@ class _StepsSheetState extends State<_StepsSheet> {
                         shape: RoundedRectangleBorder(
                             borderRadius: BorderRadius.circular(14)),
                       ),
-                      child: const Text('Сохранить',
+                      child: const Text('Сақтау',
                           style: TextStyle(fontWeight: FontWeight.w700)),
                     ),
                   ],
@@ -1036,9 +1026,11 @@ class _MedicationCard extends StatelessWidget {
               children: [
                 Text(
                   title,
+                  maxLines: 2,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                       fontWeight: FontWeight.w800,
-                      fontSize: 20,
+                      fontSize: 18,
                       color: Color(0xFF2D2D2D)),
                 ),
                 const SizedBox(height: 6),
@@ -1117,11 +1109,15 @@ class _BigStatCard extends StatelessWidget {
               Icon(icon, color: Colors.white, size: 32),
               const Spacer(),
               Text(value,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: const TextStyle(
                       color: Colors.white,
                       fontWeight: FontWeight.w900,
                       fontSize: 28)),
               Text(label,
+                  maxLines: 1,
+                  overflow: TextOverflow.ellipsis,
                   style: TextStyle(
                       color: Colors.white.withValues(alpha: 0.92),
                       fontWeight: FontWeight.w600,

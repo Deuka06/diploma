@@ -53,7 +53,7 @@ class _LoginPageState extends State<LoginPage> {
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Text(
-                'Добро пожаловать',
+                'Қош келдіңіз',
                 style: Theme.of(context).textTheme.headlineMedium?.copyWith(
                       color: MediColors.primary,
                       fontWeight: FontWeight.w700,
@@ -61,7 +61,7 @@ class _LoginPageState extends State<LoginPage> {
               ),
               const SizedBox(height: 8),
               Text(
-                'Войдите в аккаунт',
+                'Аккаунтқа кіріңіз',
                 style: TextStyle(color: MediColors.textMuted),
               ),
               const SizedBox(height: 28),
@@ -69,7 +69,7 @@ class _LoginPageState extends State<LoginPage> {
                 controller: _email,
                 keyboardType: TextInputType.emailAddress,
                 decoration: const InputDecoration(
-                  labelText: 'Почта',
+                  labelText: 'Электрондық пошта',
                   prefixIcon: Icon(Icons.mail_outline),
                 ),
               ),
@@ -78,7 +78,7 @@ class _LoginPageState extends State<LoginPage> {
                 controller: _pass,
                 obscureText: _hide,
                 decoration: InputDecoration(
-                  labelText: 'Пароль',
+                  labelText: 'Құпия сөз',
                   prefixIcon: const Icon(Icons.lock_outline),
                   suffixIcon: IconButton(
                     onPressed: () => setState(() => _hide = !_hide),
@@ -90,7 +90,7 @@ class _LoginPageState extends State<LoginPage> {
                 alignment: Alignment.centerRight,
                 child: TextButton(
                   onPressed: () {},
-                  child: const Text('Забыли пароль?'),
+                  child: const Text('Құпия сөзді ұмыттыңыз ба?'),
                 ),
               ),
               if (_err != null) ...[
@@ -100,7 +100,7 @@ class _LoginPageState extends State<LoginPage> {
               const Spacer(),
               ElevatedButton(
                 onPressed: _loading ? null : _submit,
-                child: _loading ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Войти'),
+                child: _loading ? const SizedBox(height: 22, width: 22, child: CircularProgressIndicator(strokeWidth: 2)) : const Text('Кіру'),
               ),
             ],
           ),
