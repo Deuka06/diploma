@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_svg/svg.dart';
 import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
@@ -44,8 +45,9 @@ class _SplashPageState extends State<SplashPage> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Image.asset(
-              'assets/logo.png',
+            // 2. Меняем Image.asset на SvgPicture.asset
+            SvgPicture.asset(
+              'assets/logo.svg',
               width: 120,
               height: 120,
             ),

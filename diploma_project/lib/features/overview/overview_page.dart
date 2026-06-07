@@ -66,6 +66,43 @@ class _OverviewPageState extends State<OverviewPage> {
     }
   }
 
+  void _openCheckInSheet(Map<String, dynamic> treatment) {
+    final id = treatment['id'] as int;
+    final currentProgress = (treatment['progress'] as num?)?.toDouble() ?? 0.0;
+    showModalBottomSheet<void>(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      barrierColor: Colors.black26,
+      builder: (ctx) => _DailyCheckInSheet(
+        treatmentName: treatment['disease_name'] as String? ?? '',
+        currentProgress: currentProgress,
+        onSubmit: (delta) async {
+          Navigator.of(ctx).pop();
+          await _patchProgress(id, currentProgress, delta);
+        },
+      ),
+    );
+  }
+
+  Future<void> _patchProgress(int id, double current, double delta) async {
+    final auth = context.read<AuthController>();
+    final newProgress = (current + delta).clamp(0.0, 1.0);
+    try {
+      await auth.client.dio.patch<void>(
+        '/treatments/$id/progress',
+        data: {'progress': newProgress},
+      );
+      await _load();
+    } on DioException catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(e.message ?? 'Ошибка обновления')),
+        );
+      }
+    }
+  }
+
   void _openAddSheet() {
     showModalBottomSheet<void>(
       context: context,
@@ -115,7 +152,6 @@ class _OverviewPageState extends State<OverviewPage> {
 
   @override
   Widget build(BuildContext context) {
-    final userName = context.watch<AuthController>().userName ?? 'Медет';
     return Scaffold(
       backgroundColor: Colors.white,
       floatingActionButton: FloatingActionButton(
@@ -133,54 +169,16 @@ class _OverviewPageState extends State<OverviewPage> {
           child: ListView(
             padding: const EdgeInsets.fromLTRB(0, 0, 0, 100),
             children: [
-              Padding(
-                padding: const EdgeInsets.fromLTRB(20, 8, 12, 8),
-                child: Row(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            'Привет, $userName!',
-                            style: TextStyle(
-                              fontSize: 19,
-                              fontWeight: FontWeight.w600,
-                              height: 1.2,
-                              color: MediColors.greetingPurple,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          const Text(
-                            'Ваш прогресс за последний месяц',
-                            style: TextStyle(
-                              fontSize: 25,
-                              fontWeight: FontWeight.w800,
-                              height: 1.2,
-                              color: Color(0xFF2D2D2D),
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                    IconButton(
-                      onPressed: () {},
-                      icon: Icon(Icons.notifications_rounded,
-                          color: MediColors.accentPurple, size: 26),
-                      padding: EdgeInsets.zero,
-                      constraints: const BoxConstraints(minWidth: 40, minHeight: 40),
-                    ),
-                    const SizedBox(width: 2),
-                    const Padding(
-                      padding: EdgeInsets.only(top: 6),
-                      child: CircleAvatar(
-                        radius: 20,
-                        backgroundColor: Color(0xFFFFC107),
-                        child: Text('🐕', style: TextStyle(fontSize: 20)),
-                      ),
-                    ),
-                  ],
+              const Padding(
+                padding: EdgeInsets.fromLTRB(20, 20, 20, 8),
+                child: Text(
+                  'Ваш прогресс за последний месяц',
+                  style: TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.w800,
+                    height: 1.2,
+                    color: Color(0xFF2D2D2D),
+                  ),
                 ),
               ),
               const SizedBox(height: 12),
@@ -219,12 +217,13 @@ class _OverviewPageState extends State<OverviewPage> {
                           title: t['disease_name'] as String? ?? '',
                           subtext: isCompleted
                               ? 'Вы успешно завершили'
-                              : 'Ваш еженедельный отчет',
+                              : 'Нажмите для отчёта',
                           dates: 'Начало $startDate - Конец $endDate',
                           progress: progress,
                           ringStroke: isCompleted ? 8 : 5,
                           trackAlpha: isCompleted ? 0.45 : 0.28,
                           gradient: _gradient(colorIdx),
+                          onTap: isCompleted ? null : () => _openCheckInSheet(t),
                         ),
                       );
                     }).toList(),
@@ -300,6 +299,7 @@ class _OverviewProgressCard extends StatelessWidget {
     required this.gradient,
     required this.ringStroke,
     required this.trackAlpha,
+    this.onTap,
   });
 
   final String title;
@@ -309,11 +309,14 @@ class _OverviewProgressCard extends StatelessWidget {
   final Gradient gradient;
   final double ringStroke;
   final double trackAlpha;
+  final VoidCallback? onTap;
 
   @override
   Widget build(BuildContext context) {
     final pct = (progress * 100).round();
-    return Container(
+    return GestureDetector(
+      onTap: onTap,
+      child: Container(
       decoration: BoxDecoration(
         borderRadius: BorderRadius.circular(22),
         boxShadow: [
@@ -408,6 +411,199 @@ class _OverviewProgressCard extends StatelessWidget {
             ),
           ),
         ],
+      ),
+    ));
+  }
+}
+
+class _DailyCheckInSheet extends StatefulWidget {
+  const _DailyCheckInSheet({
+    required this.treatmentName,
+    required this.currentProgress,
+    required this.onSubmit,
+  });
+
+  final String treatmentName;
+  final double currentProgress;
+  final void Function(double delta) onSubmit;
+
+  @override
+  State<_DailyCheckInSheet> createState() => _DailyCheckInSheetState();
+}
+
+class _DailyCheckInSheetState extends State<_DailyCheckInSheet> {
+  bool _tookMedicine = false;
+  bool _feelingGood = false;
+  bool _worsening = false;
+
+  double get _delta {
+    if (_worsening) return -0.15;
+    double d = 0;
+    if (_tookMedicine) d += 0.08;
+    if (_feelingGood) d += 0.07;
+    return d;
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final bottomInset = MediaQuery.viewInsetsOf(context).bottom;
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Material(
+        color: Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(24)),
+        clipBehavior: Clip.antiAlias,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(20, 12, 20, 24 + bottomInset),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
+            children: [
+              Center(
+                child: Container(
+                  width: 40,
+                  height: 4,
+                  margin: const EdgeInsets.only(bottom: 18),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFD1D1D6),
+                    borderRadius: BorderRadius.circular(999),
+                  ),
+                ),
+              ),
+              Text(
+                widget.treatmentName,
+                style: const TextStyle(fontSize: 22, fontWeight: FontWeight.w800),
+              ),
+              const SizedBox(height: 4),
+              Text(
+                'Ежедневный отчёт',
+                style: TextStyle(fontSize: 14, color: MediColors.textMuted),
+              ),
+              const SizedBox(height: 20),
+              _CheckItem(
+                icon: Icons.medication_rounded,
+                label: 'Принял(а) лекарства',
+                color: MediColors.accentPurple,
+                value: _tookMedicine,
+                onChanged: (v) => setState(() {
+                  _tookMedicine = v;
+                  if (v) _worsening = false;
+                }),
+              ),
+              const SizedBox(height: 10),
+              _CheckItem(
+                icon: Icons.sentiment_satisfied_rounded,
+                label: 'Чувствую себя хорошо',
+                color: const Color(0xFF3AB85A),
+                value: _feelingGood,
+                onChanged: (v) => setState(() {
+                  _feelingGood = v;
+                  if (v) _worsening = false;
+                }),
+              ),
+              const SizedBox(height: 10),
+              _CheckItem(
+                icon: Icons.sentiment_very_dissatisfied_rounded,
+                label: 'Ухудшение самочувствия',
+                color: const Color(0xFFFF5E6B),
+                value: _worsening,
+                onChanged: (v) => setState(() {
+                  _worsening = v;
+                  if (v) {
+                    _tookMedicine = false;
+                    _feelingGood = false;
+                  }
+                }),
+              ),
+              const SizedBox(height: 24),
+              SizedBox(
+                height: 54,
+                child: FilledButton(
+                  onPressed: (_tookMedicine || _feelingGood || _worsening)
+                      ? () => widget.onSubmit(_delta)
+                      : null,
+                  style: FilledButton.styleFrom(
+                    backgroundColor: MediColors.accentPurple,
+                    foregroundColor: Colors.white,
+                    elevation: 0,
+                    shape: RoundedRectangleBorder(
+                        borderRadius: BorderRadius.circular(16)),
+                    textStyle: const TextStyle(
+                        fontSize: 17, fontWeight: FontWeight.w800),
+                  ),
+                  child: const Text('Сохранить'),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+class _CheckItem extends StatelessWidget {
+  const _CheckItem({
+    required this.icon,
+    required this.label,
+    required this.color,
+    required this.value,
+    required this.onChanged,
+  });
+
+  final IconData icon;
+  final String label;
+  final Color color;
+  final bool value;
+  final ValueChanged<bool> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return GestureDetector(
+      onTap: () => onChanged(!value),
+      child: AnimatedContainer(
+        duration: const Duration(milliseconds: 180),
+        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 14),
+        decoration: BoxDecoration(
+          color: value ? color.withValues(alpha: 0.1) : const Color(0xFFF7F7F9),
+          borderRadius: BorderRadius.circular(16),
+          border: Border.all(
+            color: value ? color : const Color(0xFFE8E8ED),
+            width: value ? 2 : 1,
+          ),
+        ),
+        child: Row(
+          children: [
+            Icon(icon, size: 28, color: value ? color : MediColors.textMuted),
+            const SizedBox(width: 14),
+            Expanded(
+              child: Text(
+                label,
+                style: TextStyle(
+                  fontSize: 15,
+                  fontWeight: FontWeight.w700,
+                  color: value ? color : MediColors.text,
+                ),
+              ),
+            ),
+            AnimatedContainer(
+              duration: const Duration(milliseconds: 180),
+              width: 24,
+              height: 24,
+              decoration: BoxDecoration(
+                color: value ? color : Colors.transparent,
+                borderRadius: BorderRadius.circular(6),
+                border: Border.all(
+                  color: value ? color : const Color(0xFFD1D1D6),
+                  width: 2,
+                ),
+              ),
+              child: value
+                  ? const Icon(Icons.check_rounded, size: 16, color: Colors.white)
+                  : null,
+            ),
+          ],
+        ),
       ),
     );
   }

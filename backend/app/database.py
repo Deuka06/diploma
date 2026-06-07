@@ -32,7 +32,7 @@ engine = create_engine(
     pool_pre_ping=True,
     pool_size=3,
     max_overflow=5,
-    connect_args={"prepare_threshold": 0} if _is_pooler else {},
+    connect_args={"prepare_threshold": None} if _is_pooler else {},
 )
 SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 

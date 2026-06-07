@@ -71,9 +71,6 @@ class _EditProfilePageState extends State<EditProfilePage> {
   Widget build(BuildContext context) {
     final top = MediaQuery.paddingOf(context).top;
     const avatarR = 50.0;
-    final email = context.read<AuthController>().userProfile?['email'] as String? ?? '';
-    final avatarUrl =
-        'https://api.dicebear.com/7.x/avataaars/png?seed=${Uri.encodeComponent(email)}&size=256';
 
     return Scaffold(
       backgroundColor: const Color(0xFFF8F9FB),
@@ -108,20 +105,11 @@ class _EditProfilePageState extends State<EditProfilePage> {
                         ),
                         child: CircleAvatar(
                           radius: avatarR,
-                          backgroundColor: const Color(0xFFFFD54F),
-                          child: ClipOval(
-                            child: Image.network(
-                              avatarUrl,
-                              width: avatarR * 2,
-                              height: avatarR * 2,
-                              fit: BoxFit.cover,
-                              errorBuilder: (_, __, ___) => Image.asset(
-                                  'assets/6.png',
-                                  width: avatarR * 2,
-                                  height: avatarR * 2,
-                                  fit: BoxFit.cover,
-                                ),
-                            ),
+                          backgroundColor: MediColors.accentPurple.withValues(alpha: 0.15),
+                          child: Icon(
+                            Icons.person_rounded,
+                            size: avatarR * 1.2,
+                            color: MediColors.accentPurple,
                           ),
                         ),
                       ),

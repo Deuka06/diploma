@@ -3,6 +3,7 @@ import 'package:go_router/go_router.dart';
 import 'package:provider/provider.dart';
 
 import '../core/auth/auth_controller.dart';
+import '../core/stats/daily_stats_controller.dart';
 import '../core/theme/medi_theme.dart';
 import '../features/auth/login_page.dart';
 import '../features/auth/onboarding_flow_page.dart';
@@ -171,8 +172,11 @@ class _MediRootState extends State<MediRoot> {
 
   @override
   Widget build(BuildContext context) {
-    return ChangeNotifierProvider.value(
-      value: _auth,
+    return MultiProvider(
+      providers: [
+        ChangeNotifierProvider.value(value: _auth),
+        ChangeNotifierProvider(create: (_) => DailyStatsController()),
+      ],
       child: MaterialApp.router(
         debugShowCheckedModeBanner: false,
         theme: buildMediTheme(),

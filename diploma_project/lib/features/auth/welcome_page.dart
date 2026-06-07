@@ -33,7 +33,7 @@ class WelcomePage extends StatelessWidget {
               ),
               const SizedBox(height: 32),
               Image.asset(
-                'assets/1.png',
+                'assets/4.png',
                 height: 200,
                 fit: BoxFit.contain,
               ),

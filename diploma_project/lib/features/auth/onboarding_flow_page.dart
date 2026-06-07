@@ -804,36 +804,11 @@ class _CongratsStep extends StatelessWidget {
           ),
           const SizedBox(height: 32),
           Expanded(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                Icon(Icons.celebration_rounded, size: 48, color: Colors.pink.shade200),
-                Positioned(
-                  top: 40,
-                  left: 30,
-                  child: Icon(Icons.favorite_rounded, color: Colors.red.shade200, size: 28),
-                ),
-                Positioned(
-                  top: 20,
-                  right: 40,
-                  child: Icon(Icons.star_rounded, color: Colors.amber.shade300, size: 32),
-                ),
-                Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Row(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(Icons.person_rounded, size: 72, color: MediColors.accentPurple.withValues(alpha: 0.85)),
-                        const SizedBox(width: 8),
-                        Icon(Icons.person_outline_rounded, size: 72, color: MediColors.accentPurple.withValues(alpha: 0.55)),
-                      ],
-                    ),
-                    const SizedBox(height: 16),
-                    const Text('🎉', style: TextStyle(fontSize: 40)),
-                  ],
-                ),
-              ],
+            child: Center(
+              child: Image.asset(
+                'assets/1.png',
+                fit: BoxFit.contain,
+              ),
             ),
           ),
         ],

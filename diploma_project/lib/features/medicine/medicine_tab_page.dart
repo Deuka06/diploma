@@ -78,42 +78,17 @@ class _MedicineTabPageState extends State<MedicineTabPage> {
               child: SafeArea(
                 bottom: false,
                 child: Padding(
-                  padding: const EdgeInsets.fromLTRB(20, 8, 16, 0),
+                  padding: const EdgeInsets.fromLTRB(20, 20, 16, 0),
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Align(
-                        alignment: Alignment.centerRight,
-                        child: CircleAvatar(
-                          radius: 22,
-                          backgroundColor: MediColors.accentPurple.withValues(alpha: 0.15),
-                          child: Icon(
-                            Icons.person_rounded,
-                            size: 26,
-                            color: MediColors.accentPurple,
-                          ),
-                        ),
-                      ),
-                      const SizedBox(height: 12),
-                      Consumer<AuthController>(
-                        builder: (_, auth, __) => Text(
-                          'Привет, ${auth.userName ?? 'Медет'}!',
-                          style: Theme.of(context).textTheme.headlineSmall?.copyWith(
-                                color: MediColors.greetingPurple,
-                                fontWeight: FontWeight.w800,
-                                fontSize: 26,
-                                height: 1.15,
-                              ),
-                        ),
-                      ),
-                      const SizedBox(height: 10),
                       const Text(
                         'Давайте найдем лекарство',
                         style: TextStyle(
                           fontSize: 22,
                           fontWeight: FontWeight.w800,
                           height: 1.2,
-                          color: Color(0xFF1A1A1A),
+                          color: MediColors.accentPurple,
                         ),
                       ),
                       const SizedBox(height: 20),

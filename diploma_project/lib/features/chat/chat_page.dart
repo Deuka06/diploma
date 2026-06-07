@@ -121,6 +121,34 @@ class _ChatPageState extends State<ChatPage> {
     unawaited(ChatHistoryStorage.save(rows));
   }
 
+  Future<void> _clearHistory() async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Очистить историю?'),
+        content: const Text('Все сообщения будут удалены безвозвратно.'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, false),
+            child: const Text('Отмена'),
+          ),
+          TextButton(
+            onPressed: () => Navigator.pop(ctx, true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Очистить'),
+          ),
+        ],
+      ),
+    );
+    if (confirmed != true || !mounted) return;
+    await ChatHistoryStorage.clear();
+    setState(() {
+      _messages
+        ..clear()
+        ..add(_welcome());
+    });
+  }
+
   @override
   void dispose() {
     _scroll.dispose();
@@ -197,14 +225,27 @@ class _ChatPageState extends State<ChatPage> {
           SafeArea(
             bottom: false,
             child: Padding(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 4),
-              child: Text(
-                'Чат',
-                style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                      fontWeight: FontWeight.w800,
-                      fontSize: 20,
-                      color: MediColors.chatBubbleText,
+              padding: const EdgeInsets.fromLTRB(16, 8, 4, 4),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    'Чат',
+                    style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                          fontWeight: FontWeight.w800,
+                          fontSize: 20,
+                          color: MediColors.chatBubbleText,
+                        ),
+                  ),
+                  IconButton(
+                    onPressed: _clearHistory,
+                    tooltip: 'Очистить историю',
+                    icon: Icon(
+                      Icons.delete_outline_rounded,
+                      color: MediColors.chatTimestamp,
                     ),
+                  ),
+                ],
               ),
             ),
           ),

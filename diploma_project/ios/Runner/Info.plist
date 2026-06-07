@@ -47,6 +47,8 @@
 			</array>
 		</dict>
 	</dict>
+	<key>NSMotionUsageDescription</key>
+	<string>MEDI использует шагомер для отслеживания вашей физической активности.</string>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
 	<key>UILaunchStoryboardName</key>

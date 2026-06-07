@@ -19,8 +19,8 @@ class _ProfilePageState extends State<ProfilePage> {
 
   /// Фон контента по макету (#F8F9FB).
   static const _pageBg = Color(0xFFF8F9FB);
-  static const _fallbackName = 'Махамбетхан Медет';
-  static const _fallbackEmail = 'medet.makhambetkhan@jihc.kz';
+  static const _fallbackName = '';
+  static const _fallbackEmail = '';
 
   @override
   void initState() {
@@ -58,20 +58,14 @@ class _ProfilePageState extends State<ProfilePage> {
     if (full != null && full.isNotEmpty) return full;
     final f = (u['first_name'] as String?)?.trim() ?? '';
     final l = (u['last_name'] as String?)?.trim() ?? '';
-    final combined = '$f $l'.trim();
-    if (combined.isNotEmpty) return combined;
-    return _fallbackName;
+    return '$f $l'.trim();
   }
 
   String get _email {
     final u = _user;
     if (u == null) return _fallbackEmail;
-    final e = u['email'] as String?;
-    if (e != null && e.isNotEmpty) return e;
-    return _fallbackEmail;
+    return (u['email'] as String?)?.trim() ?? _fallbackEmail;
   }
-
-  String get _avatarSeed => _email;
 
   @override
   Widget build(BuildContext context) {
@@ -86,7 +80,6 @@ class _ProfilePageState extends State<ProfilePage> {
                   child: _ProfileHeaderBlock(
                     name: _displayName,
                     email: _email,
-                    avatarSeed: _avatarSeed,
                   ),
                 ),
                 SliverToBoxAdapter(
@@ -147,12 +140,10 @@ class _ProfileHeaderBlock extends StatelessWidget {
   const _ProfileHeaderBlock({
     required this.name,
     required this.email,
-    required this.avatarSeed,
   });
 
   final String name;
   final String email;
-  final String avatarSeed;
 
   static const _gradient = LinearGradient(
     begin: Alignment.topLeft,
@@ -167,10 +158,7 @@ class _ProfileHeaderBlock extends StatelessWidget {
     final top = MediaQuery.paddingOf(context).top;
     const avatarR = 56.0;
     const overlap = 52.0;
-    final avatarUrl =
-        'https://api.dicebear.com/7.x/avataaars/png?seed=${Uri.encodeComponent(avatarSeed)}&size=256';
 
-    /// Нижняя граница градиента; аватар «висит» вниз на [overlap].
     final gradientH = top + 132.0;
 
     return SizedBox(
@@ -227,61 +215,24 @@ class _ProfileHeaderBlock extends StatelessWidget {
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                Stack(
-                  clipBehavior: Clip.none,
-                  alignment: Alignment.center,
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        shape: BoxShape.circle,
-                        color: Colors.white,
-                        boxShadow: [
-                          BoxShadow(
-                            color: Color(0x1A000000),
-                            blurRadius: 16,
-                            offset: Offset(0, 6),
-                          ),
-                        ],
+                Container(
+                  padding: const EdgeInsets.all(4),
+                  decoration: const BoxDecoration(
+                    shape: BoxShape.circle,
+                    color: Colors.white,
+                    boxShadow: [
+                      BoxShadow(
+                        color: Color(0x1A000000),
+                        blurRadius: 16,
+                        offset: Offset(0, 6),
                       ),
-                      child: CircleAvatar(
-                        radius: avatarR,
-                        backgroundColor: const Color(0xFFFFD54F),
-                        child: ClipOval(
-                          child: Image.network(
-                            avatarUrl,
-                            width: avatarR * 2,
-                            height: avatarR * 2,
-                            fit: BoxFit.cover,
-                            errorBuilder: (_, __, ___) => Image.asset(
-                              'assets/6.png',
-                              width: avatarR * 2,
-                              height: avatarR * 2,
-                              fit: BoxFit.cover,
-                            ),
-                          ),
-                        ),
-                      ),
-                    ),
-                    Positioned(
-                      right: 4,
-                      bottom: 4,
-                      child: Material(
-                        color: const Color(0xFFFFB3C8),
-                        shape: const CircleBorder(),
-                        elevation: 2,
-                        shadowColor: Colors.black26,
-                        child: InkWell(
-                          onTap: () {},
-                          customBorder: const CircleBorder(),
-                          child: const Padding(
-                            padding: EdgeInsets.all(8),
-                            child: Icon(Icons.edit_rounded, color: Colors.white, size: 18),
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
+                    ],
+                  ),
+                  child: CircleAvatar(
+                    radius: avatarR,
+                    backgroundColor: const Color(0xFFFFD54F),
+                    child: const Icon(Icons.person, size: 64, color: Colors.white),
+                  ),
                 ),
                 const SizedBox(height: 16),
                 Text(
