@@ -465,15 +465,6 @@ class _ProductCard extends StatelessWidget {
   final String? imageUrl;
   final VoidCallback onTap;
 
-  static const _localImages = {
-    'paracetamol-500': 'assets/парацетамол.png',
-    'ibuprofen-400': 'assets/ибупрофин.webp',
-    'vitamin-d3': 'assets/д3.jpg',
-    'omeprazole-20': 'assets/омепразол.png',
-    'amoxicillin-500': 'assets/med1.png',
-    'loratadine-10': 'assets/med2.png',
-  };
-
   @override
   Widget build(BuildContext context) {
     final title = name.isNotEmpty ? name : 'Дәрі';
@@ -524,19 +515,11 @@ class _ProductCard extends StatelessWidget {
   }
 
   Widget _buildImage() {
-    final localPath = _localImages[id];
-    if (localPath != null) {
+    if (imageUrl != null && imageUrl!.isNotEmpty) {
       return Padding(
         padding: const EdgeInsets.all(8),
-        child: Image.asset(
-          localPath,
-          fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) => _productPlaceholder(),
-        ),
+        child: _mediImage(imageUrl!, BoxFit.contain, _productPlaceholder()),
       );
-    }
-    if (imageUrl != null && imageUrl!.isNotEmpty) {
-      return _mediImage(imageUrl!, BoxFit.contain, _productPlaceholder());
     }
     return _productPlaceholder();
   }

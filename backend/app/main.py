@@ -13,6 +13,7 @@ from app.routers.checkout import router as checkout_router
 from app.routers.faqs import router as faqs_router
 from app.routers.health import router as health_router
 from app.routers.medicines import router as medicines_router
+from app.routers.orders import router as orders_router
 from app.routers.reminders import router as reminders_router
 from app.routers.treatments import router as treatments_router
 from app.routers.users import router as users_router
@@ -63,6 +64,7 @@ app.include_router(treatments_router)
 app.include_router(appointments_router)
 app.include_router(reminders_router)
 app.include_router(checkout_router)
+app.include_router(orders_router)
 app.include_router(faqs_router)
 app.include_router(chat_router)
 

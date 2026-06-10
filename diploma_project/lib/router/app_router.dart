@@ -22,6 +22,7 @@ import '../features/overview/overview_page.dart';
 import '../features/profile/card_page.dart';
 import '../features/profile/edit_profile_page.dart';
 import '../features/profile/help_page.dart';
+import '../features/profile/order_history_page.dart';
 import '../features/profile/profile_page.dart';
 import '../features/reminders/reminders_page.dart';
 import '../features/shell/medi_shell.dart';
@@ -135,6 +136,11 @@ GoRouter createAppRouter(AuthController auth) {
         parentNavigatorKey: rootNavigatorKey,
         path: '/card',
         builder: (_, __) => const CardPage(),
+      ),
+      GoRoute(
+        parentNavigatorKey: rootNavigatorKey,
+        path: '/orders',
+        builder: (_, __) => const OrderHistoryPage(),
       ),
       GoRoute(
         parentNavigatorKey: rootNavigatorKey,

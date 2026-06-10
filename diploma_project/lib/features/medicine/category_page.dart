@@ -219,11 +219,7 @@ class _MedicineGridCard extends StatelessWidget {
                 Expanded(
                   child: Center(
                     child: imageUrl != null && imageUrl!.isNotEmpty
-                        ? Image.network(
-                            imageUrl!,
-                            fit: BoxFit.contain,
-                            errorBuilder: (_, __, ___) => _placeholder(),
-                          )
+                        ? _mediImage(imageUrl!, BoxFit.contain, _placeholder())
                         : _placeholder(),
                   ),
                 ),
@@ -268,4 +264,11 @@ class _MedicineGridCard extends StatelessWidget {
       color: MediColors.accentPurple.withValues(alpha: 0.4),
     );
   }
+}
+
+Widget _mediImage(String url, BoxFit fit, Widget placeholder) {
+  if (url.startsWith('assets/')) {
+    return Image.asset(url, fit: fit, errorBuilder: (_, __, ___) => placeholder);
+  }
+  return Image.network(url, fit: fit, errorBuilder: (_, __, ___) => placeholder);
 }

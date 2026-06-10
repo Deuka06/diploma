@@ -31,3 +31,8 @@ flutter:
 
   assets:
     - assets/
+    - assets/голова/
+    - assets/зубы/
+    - assets/сердце/
+    - assets/витамины/
+    - assets/антибиотики/

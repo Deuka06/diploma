@@ -163,16 +163,21 @@ class _CheckoutProductThumb extends StatelessWidget {
     if (imageUrl != null && imageUrl!.isNotEmpty) {
       return ClipRRect(
         borderRadius: BorderRadius.circular(12),
-        child: Image.network(
-          imageUrl!,
+        child: SizedBox(
           height: h,
-          fit: BoxFit.contain,
-          errorBuilder: (_, __, ___) => _Placeholder(name: name, height: h),
+          child: _mediImage(imageUrl!, BoxFit.contain, _Placeholder(name: name, height: h)),
         ),
       );
     }
     return _Placeholder(name: name, height: h);
   }
+}
+
+Widget _mediImage(String url, BoxFit fit, Widget placeholder) {
+  if (url.startsWith('assets/')) {
+    return Image.asset(url, fit: fit, errorBuilder: (_, __, ___) => placeholder);
+  }
+  return Image.network(url, fit: fit, errorBuilder: (_, __, ___) => placeholder);
 }
 
 class _Placeholder extends StatelessWidget {

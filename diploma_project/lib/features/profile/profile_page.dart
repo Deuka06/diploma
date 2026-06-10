@@ -87,7 +87,7 @@ class _ProfilePageState extends State<ProfilePage> {
                     padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
                     child: Column(
                       children: [
-                        _ParcelsHighlightTile(onTap: () {}),
+                        _ParcelsHighlightTile(onTap: () => context.push('/orders')),
                         const SizedBox(height: 14),
                         _ProfileMenuCard(
                           children: [

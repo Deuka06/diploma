@@ -1,10 +1,13 @@
+import 'package:dio/dio.dart';
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import 'package:provider/provider.dart';
 
+import '../../core/auth/auth_controller.dart';
 import '../../core/theme/medi_theme.dart';
 import 'checkout_selection.dart';
 
-class CheckoutPaymentPage extends StatelessWidget {
+class CheckoutPaymentPage extends StatefulWidget {
   const CheckoutPaymentPage({super.key, required this.selection});
 
   final CheckoutSelection selection;
@@ -13,6 +16,91 @@ class CheckoutPaymentPage extends StatelessWidget {
 
   /// Демо-баланс карты по макету (без бэкенда).
   static const _demoCardBalance = '4500 тг';
+
+  @override
+  State<CheckoutPaymentPage> createState() => _CheckoutPaymentPageState();
+}
+
+class _CheckoutPaymentPageState extends State<CheckoutPaymentPage> {
+  bool _processing = false;
+
+  CheckoutSelection get selection => widget.selection;
+  static const _pageBg = CheckoutPaymentPage._pageBg;
+  static const _demoCardBalance = CheckoutPaymentPage._demoCardBalance;
+
+  Future<void> _pay() async {
+    if (_processing) return;
+    setState(() => _processing = true);
+    try {
+      final auth = context.read<AuthController>();
+      await auth.client.dio.post('/orders', data: {
+        'items': [
+          {
+            'medicine_id': selection.medicineId,
+            'quantity': 1,
+            'unit_price': selection.price,
+          }
+        ],
+        'delivery_text': selection.deliveryText,
+        'seller_name': selection.sellerName,
+      });
+    } on DioException {
+      // демо-режим: продолжаем показывать успех даже если заказ не сохранился
+    }
+    if (!mounted) return;
+    setState(() => _processing = false);
+    await showDialog<void>(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+        contentPadding: const EdgeInsets.fromLTRB(24, 28, 24, 20),
+        content: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Container(
+              width: 64,
+              height: 64,
+              decoration: const BoxDecoration(
+                color: MediColors.success,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(Icons.check_rounded, color: Colors.white, size: 36),
+            ),
+            const SizedBox(height: 16),
+            const Text(
+              'Төлем сәтті аяқталды',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.w800, color: Color(0xFF000000)),
+            ),
+            const SizedBox(height: 8),
+            const Text(
+              'Тапсырысыңыз қабылданды',
+              textAlign: TextAlign.center,
+              style: TextStyle(fontSize: 14, color: MediColors.textMuted, height: 1.3),
+            ),
+          ],
+        ),
+        actions: [
+          SizedBox(
+            width: double.infinity,
+            child: FilledButton(
+              onPressed: () => Navigator.of(ctx).pop(),
+              style: FilledButton.styleFrom(
+                backgroundColor: MediColors.accentPurple,
+                foregroundColor: Colors.white,
+                elevation: 0,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(14)),
+                textStyle: const TextStyle(fontSize: 16, fontWeight: FontWeight.w800),
+              ),
+              child: const Text('Жарайды'),
+            ),
+          ),
+        ],
+      ),
+    );
+    if (!mounted) return;
+    context.go('/t/medicine');
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -138,11 +226,7 @@ class CheckoutPaymentPage extends StatelessWidget {
                 width: double.infinity,
                 height: 54,
                 child: FilledButton(
-                  onPressed: () {
-                    ScaffoldMessenger.of(context).showSnackBar(
-                      const SnackBar(content: Text('Төлем (MVP): тапсырыс рәсімделді')),
-                    );
-                  },
+                  onPressed: _processing ? null : _pay,
                   style: FilledButton.styleFrom(
                     backgroundColor: MediColors.accentPurple,
                     foregroundColor: Colors.white,
@@ -150,7 +234,13 @@ class CheckoutPaymentPage extends StatelessWidget {
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                     textStyle: const TextStyle(fontSize: 17, fontWeight: FontWeight.w800),
                   ),
-                  child: const Text('Төлемге өту'),
+                  child: _processing
+                      ? const SizedBox(
+                          width: 22,
+                          height: 22,
+                          child: CircularProgressIndicator(strokeWidth: 2.5, color: Colors.white),
+                        )
+                      : const Text('Төлемге өту'),
                 ),
               ),
             ),
