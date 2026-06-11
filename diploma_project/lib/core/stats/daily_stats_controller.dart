@@ -2,6 +2,7 @@ import 'dart:async';
 
 import 'package:flutter/foundation.dart';
 import 'package:pedometer/pedometer.dart';
+import 'package:permission_handler/permission_handler.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 class DailyStatsController extends ChangeNotifier {
@@ -56,7 +57,13 @@ class DailyStatsController extends ChangeNotifier {
     _initPedometer();
   }
 
-  void _initPedometer() {
+  Future<void> _initPedometer() async {
+    final status = await Permission.activityRecognition.request();
+    if (!status.isGranted) {
+      _pedometerActive = false;
+      notifyListeners();
+      return;
+    }
     _stepSub?.cancel();
     try {
       _stepSub = Pedometer.stepCountStream.listen(
